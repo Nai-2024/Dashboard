@@ -1,3 +1,4 @@
+HEAD
 # Logs
 logs
 *.log
@@ -22,3 +23,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Object file
+*.o
+
+# Ada Library Information
+*.ali
+1d67e631ba6f959e8ab9a7efc34887a2f7aea088
