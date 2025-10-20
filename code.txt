@@ -1,0 +1,177 @@
+
+
+import { Link } from "react-router-dom";
+import { FiGrid, FiMapPin, FiBell, FiLogOut } from "react-icons/fi";
+import { FaCity } from "react-icons/fa";
+import { useState } from "react";
+import AddPlace from "./Places/AddPlaceForm";
+import AddCity from "./Cities/AddCityForm";
+
+export default function Dashboard() {
+  const [showForm, setShowForm] = useState(false);
+  const [editingData, setEditingData] = useState(null);
+  const [places, setPlaces] = useState([]); // <-- dynamic only, no hardcoded
+
+  const handleAddPlace = (place) => {
+    if (editingData) {
+      // update existing place
+      setPlaces((prev) =>
+        prev.map((p, idx) => (idx === editingData.index ? place : p))
+      );
+    } else {
+      // add new place
+      setPlaces([...places, place]);
+    }
+    setShowForm(false);
+    setEditingData(null);
+  };
+
+  const handleEdit = (place, index) => {
+    setEditingData({ ...place, index }); // store index for update
+    setShowForm(true);
+  };
+
+  const handleDelete = (index) => {
+    setPlaces((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <aside className="w-1/5 bg-white shadow-md flex flex-col justify-between">
+        <div>
+          <h1 className="p-6 text-lg font-bold text-gray-900">
+            Travel App Admin
+          </h1>
+          <nav className="flex flex-col">
+            <Link
+              to="/"
+              className="flex items-center gap-2 px-6 py-2 text-gray-700 font-medium hover:bg-sky-100 hover:text-sky-600 transition-colors"
+            >
+              <FiGrid strokeWidth={3} /> Dashboard
+            </Link>
+            <button
+              // onClick={() => setShowForm(false)}
+              className="flex items-center gap-2 px-6 py-2 text-gray-700 hover:bg-sky-100 hover:text-sky-600 transition-colors text-left"
+            >
+              <FiMapPin strokeWidth={3} /> Places
+            </button>
+            <Link
+              to="/"
+              className="flex items-center gap-2 px-6 py-2 text-gray-700 hover:bg-sky-100 hover:text-sky-600 transition-colors"
+            >
+              <FaCity strokeWidth={3} /> Cities
+            </Link>
+            <Link
+              to="/notifications"
+              className="flex items-center gap-2 px-6 py-2 text-gray-700 hover:bg-sky-100 hover:text-sky-600 transition-colors"
+            >
+              <FiBell strokeWidth={3} /> Notifications
+            </Link>
+          </nav>
+        </div>
+
+        <div className="p-6">
+          <button className="flex items-center gap-2 w-full text-left text-gray-700 font-semibold hover:text-red-600">
+            <FiLogOut /> Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 bg-gray-100 p-6">
+        {showForm ? (
+          <AddPlace
+            onAddPlace={handleAddPlace}
+            onCancel={() => {
+              setShowForm(false);
+              setEditingData(null);
+            }}
+            editingData={editingData}
+          />
+        ) : (
+          <>
+            {/* Profile Header */}
+            <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm mb-6">
+              <div className="flex items-center gap-4">
+                <img
+                  src="https://i.pravatar.cc/50?img=12" // placeholder avatar
+                  alt="Profile"
+                  className="w-12 h-12 rounded-full border border-gray-200"
+                />
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Laura Williams
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    Administrator · Last updated 2 hours ago
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <section className="flex items-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-900">Places</h1>
+              <button
+                className="ml-auto bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-md text-sm font-medium"
+                onClick={() => {
+                  setEditingData(null);
+                  setShowForm(true);
+                }}
+              >
+                Add Place
+              </button>
+            </section>
+
+            <div className="bg-white rounded-lg shadow-md overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
+                <thead className="bg-gray-100 text-gray-700">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Name</th>
+                    <th className="px-4 py-3 text-left">City</th>
+                    <th className="px-4 py-3 text-left">Description</th>
+                    <th className="px-4 py-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {places.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="4"
+                        className="px-4 py-6 text-center text-gray-500"
+                      >
+                        No places added yet
+                      </td>
+                    </tr>
+                  ) : (
+                    places.map((place, idx) => (
+                      <tr key={idx} className="border-b last:border-b-0">
+                        <td className="px-4 py-3">{place.name}</td>
+                        <td className="px-4 py-3">{place.city}</td>
+                        <td className="px-4 py-3">{place.description}</td>
+                        <td className="px-4 py-3 flex justify-between gap-6">
+                          <button
+                            onClick={() => handleEdit(place, idx)}
+                            className="text-sky-600 font-semibold hover:underline"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(idx)}
+                            className="text-red-600 font-semibold hover:underline"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </main>
+    </div>
+  );
+}
