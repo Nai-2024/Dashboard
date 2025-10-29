@@ -4,22 +4,17 @@ import { Link } from "react-router-dom";
 export default function AddCityForm({ onAddCity, onCancel, editingData }) {
   const [form, setForm] = useState({
     cityName: "",
-    state: "",
     country: "",
     description: "",
     image: null,
   });
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm({ ...form, image: reader.result }); // Base64 string
-      };
-      reader.readAsDataURL(file); // converts to base64
-    }
-  };
+ const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    setForm({ ...form, image: file });
+  }
+};
 
   // ✅ Prefill form when editing
   useEffect(() => {
@@ -60,22 +55,6 @@ export default function AddCityForm({ onAddCity, onCancel, editingData }) {
             value={form.cityName}
             onChange={handleChange}
             placeholder="Enter city name"
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-            required
-          />
-        </div>
-
-        {/* State */}
-        <div>
-          <label className="block font-medium text-gray-700 mb-1">
-            Province (State) *
-          </label>
-          <input
-            type="text"
-            name="state"
-            value={form.state}
-            onChange={handleChange}
-            placeholder="Enter state/province"
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
             required
           />

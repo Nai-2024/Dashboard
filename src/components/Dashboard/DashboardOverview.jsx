@@ -1,152 +1,282 @@
-import React from "react";
-import { FiMapPin, FiPlusCircle, FiTrash2, FiSettings } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { FiMapPin, FiPlusCircle, FiTrash2 } from "react-icons/fi";
 import { FaCity } from "react-icons/fa";
-import { HiOutlineViewGrid } from "react-icons/hi";
-import { HiOutlineUser } from "react-icons/hi";
-import { Link } from "react-router-dom";
+import { HiOutlineViewGrid, HiOutlineUser } from "react-icons/hi";
+import AddPlaceForm from "../Places/AddPlaceForm";
+import AddCityForm from "../Cities/AddCityForm";
+import {
+  fetchCities,
+  fetchPlaces,
+  fetchCategories,
+} from "../../services/apiService";
+
+function getRecentActivities() {
+  const stored = localStorage.getItem("recentActivities");
+  return stored ? JSON.parse(stored) : [];
+}
 
 export default function DashboardOverview() {
+  const [showPlaceForm, setShowPlaceForm] = useState(false);
+  const [showCityForm, setShowCityForm] = useState(false);
+  const [cityCount, setCityCount] = useState(0);
+  const [placeCount, setPlaceCount] = useState(0);
+  const [categoryCount, setCategoryCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const [activities, setActivities] = useState([]);
+
+  const handleAddPlace = (data) => {
+    console.log("Place added:", data);
+    setShowPlaceForm(false);
+  };
+
+  const handleAddCity = (data) => {
+    console.log("City added:", data);
+    setShowCityForm(false);
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [cities, places] = await Promise.all([
+          fetchCities(),
+          fetchPlaces(),
+        ]);
+        setCityCount(cities.length);
+        setPlaceCount(places.length);
+
+        //  Load recent activity log
+        setActivities(getRecentActivities());
+      } catch (err) {
+        console.error("Failed to fetch dashboard stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  // auto-refresh for activity logs
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActivities(getRecentActivities());
+    }, 3000); // refresh every 3 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="space-y-6">
-      {/* Stats Section */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Cities */}
-        <Link
-          to="/cities"
-          className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center text-center transition hover:shadow-md"
-        >
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 mb-2">
-            <FaCity className="text-sky-600 text-2xl" />
-          </div>
-          <p className="text-sm text-gray-500">Total Cities</p>
-          <h2 className="text-xl font-semibold text-gray-900 mt-1">58</h2>
-        </Link>
+      {/* Conditionally show form or main dashboard */}
+      {showPlaceForm ? (
+        <AddPlaceForm
+          onAddPlace={handleAddPlace}
+          onCancel={() => setShowPlaceForm(false)}
+        />
+      ) : showCityForm ? (
+        <AddCityForm
+          onAddPlace={handleAddCity}
+          onCancel={() => setShowCityForm(false)}
+        />
+      ) : (
+        <>
+          {/* Stats Section */}
+          <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Cities */}
+            <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center text-center transition hover:shadow-md">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 mb-2">
+                <FaCity className="text-sky-600 text-2xl" />
+              </div>
+              <p className="text-sm text-gray-500">Total Cities</p>
+              <h2 className="text-xl font-semibold text-gray-900 mt-1">
+                {loading ? "..." : cityCount}
+              </h2>
+            </div>
 
-        {/* Places */}
-        <Link
-          to="/places"
-          className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center text-center transition hover:shadow-md"
-        >
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-green-100 mb-2">
-            <FiMapPin className="text-green-600 text-2xl" />
-          </div>
-          <p className="text-sm text-gray-500">Total Places</p>
-          <h2 className="text-xl font-semibold text-gray-900 mt-1">1,250</h2>
-        </Link>
+            {/* Places */}
+            <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center text-center transition hover:shadow-md">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-green-100 mb-2">
+                <FiMapPin className="text-green-600 text-2xl" />
+              </div>
+              <p className="text-sm text-gray-500">Total Places</p>
+              <h2 className="text-xl font-semibold text-gray-900 mt-1">
+                {loading ? "..." : placeCount}
+              </h2>
+            </div>
 
-        {/* Categories */}
-        <Link
-          to="/"
-          className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center text-center transition hover:shadow-md"
-        >
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 mb-2">
-            <HiOutlineViewGrid className="text-indigo-600 text-2xl" />
-          </div>
-          <p className="text-sm text-gray-500">Categories</p>
-          <h2 className="text-xl font-semibold text-gray-900 mt-1">15</h2>
-        </Link>
+            {/* Categories */}
+            <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center text-center transition hover:shadow-md">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 mb-2">
+                <HiOutlineViewGrid className="text-indigo-600 text-2xl" />
+              </div>
+              <p className="text-sm text-gray-500">Categories</p>
+              <h2 className="text-xl font-semibold text-gray-900 mt-1">
+                {" "}
+                {loading ? "..." : categoryCount}
+              </h2>
+            </div>
 
-        {/* Users */}
-        <Link
-          to="/"
-          className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center text-center transition hover:shadow-md"
-        >
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-50 mb-2">
-            <HiOutlineUser className="text-sky-600 text-2xl" />
-          </div>
-          <p className="text-sm text-gray-500">Users</p>
-          <h2 className="text-xl font-semibold text-gray-900 mt-1">1,000</h2>
-        </Link>
-      </section>
+            {/* Users */}
+            <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center text-center transition hover:shadow-md">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-50 mb-2">
+                <HiOutlineUser className="text-sky-600 text-2xl" />
+              </div>
+              <p className="text-sm text-gray-500">Users</p>
+              <h2 className="text-xl font-semibold text-gray-900 mt-1">
+                1,000
+              </h2>
+            </div>
+          </section>
 
-      {/* Recent Activity */}
-      {/* Recent Activity */}
-      <section className="grid grid-cols-1 lg:grid-cols-[4fr_1fr] gap-6">
-        {/* Left: Recent Activity Table */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">
-            Recent Activity
-          </h3>
-          <table className="w-full text-sm text-gray-700">
-            <thead className="bg-gray-100 text-left text-gray-600\">
-              <tr>
-                <th className="px-4 py-2">Action</th>
-                <th className="px-4 py-2">Type</th>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-t">
-                <td className="px-4 py-2 text-green-600 font-medium">Added</td>
-                <td className="px-4 py-2">Place</td>
-                <td className="px-4 py-2 font-semibold">Eiffel Tower</td>
-                <td className="px-4 py-2 text-gray-500">2 hours ago</td>
-              </tr>
-              <tr className="border-t">
-                <td className="px-4 py-2 text-blue-600 font-medium">Edited</td>
-                <td className="px-4 py-2">City</td>
-                <td className="px-4 py-2 font-semibold">Paris</td>
-                <td className="px-4 py-2 text-gray-500">3 hours ago</td>
-              </tr>
-              <tr className="border-t">
-                <td className="px-4 py-2 text-red-600 font-medium">Deleted</td>
-                <td className="px-4 py-2">Place</td>
-                <td className="px-4 py-2 font-semibold">Old Souk</td>
-                <td className="px-4 py-2 text-gray-500">5 hours ago</td>
-              </tr>
-              <tr className="border-t">
-                <td className="px-4 py-2 text-green-600 font-medium">Added</td>
-                <td className="px-4 py-2">City</td>
-                <td className="px-4 py-2 font-semibold">Rome</td>
-                <td className="px-4 py-2 text-gray-500">1 day ago</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          {/* Recent Activity & Quick Controls */}
+          <section className="grid grid-cols-1 lg:grid-cols-[4fr_1fr] gap-6">
+            {/* Recent Activity Table */}
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Recent Activity
+              </h3>
+              <table className="w-full text-sm text-gray-700">
+                <div className="overflow-x-auto rounded-md">
+                  <table className="min-w-full text-sm text-gray-700 table-fixed">
+                    <thead className="bg-gray-100 text-gray-600 text-sm font-semibold">
+                      <tr>
+                        <th className="px-4 py-3 w-1/4 text-left">Action</th>
+                        <th className="px-4 py-3 w-1/4 text-left">Type</th>
+                        <th className="px-4 py-3 w-1/4 text-left">Name</th>
+                        <th className="px-4 py-3 w-1/4 text-left">Date</th>
+                      </tr>
+                    </thead>
 
-        {/* Right: Quick Actions */}
-        <div className="bg-white p-6 rounded-lg shadow-sm flex flex-col items-stretch justify-start space-y-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2 text-center">
-            Quick Controls
-          </h3>
+                    <tbody>
+                      {activities.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan="4"
+                            className="text-center py-6 text-gray-400 italic bg-gray-50 rounded-md"
+                          >
+                            No recent activity yet
+                          </td>
+                        </tr>
+                      ) : (
+                        activities.map((a) => (
+                          <tr
+                            key={a.id}
+                            className="border-t border-b transition-all duration-200"
+                          >
+                            {/* Action */}
+                            {/* Action */}
+                            <td className="px-4 py-3 font-medium text-center sm:text-left">
+                              <span
+                                className={`inline-flex items-center justify-center gap-2 ${
+                                  a.action === "Deleted"
+                                    ? "text-red-600"
+                                    : a.action === "Updated"
+                                    ? "text-blue-600"
+                                    : "text-green-600"
+                                }`}
+                              >
+                                <span
+                                  className={`w-2.5 h-2.5 rounded-full ${
+                                    a.action === "Deleted"
+                                      ? "bg-red-500"
+                                      : a.action === "Updated"
+                                      ? "bg-blue-500"
+                                      : "bg-green-500"
+                                  }`}
+                                ></span>
+                                <span className="capitalize">{a.action}</span>
+                              </span>
+                            </td>
 
-          {/* Add City Button */}
-          <Link to="/add-city" className="w-full">
-            <button className="w-full bg-sky-600 text-white px-4 py-2 rounded-full flex items-center gap-2 justify-center hover:bg-sky-700 cursor-pointer transition">
-              <FiPlusCircle /> Add City
-            </button>
-          </Link>
+                            {/* Type */}
+                            <td className="px-4 py-3">
+                              <span className="px-2 py-1 text-xs text-gray-600">
+                                {a.type}
+                              </span>
+                            </td>
 
-          {/* Add Place Button */}
-          <Link to="/add-place" className="w-full">
-            <button className="w-full bg-sky-600 text-white px-4 py-2 rounded-full flex items-center gap-2 justify-center hover:bg-sky-700 cursor-pointer transition">
-              <FiMapPin /> Add Place
-            </button>
-          </Link>
+                            {/* Name */}
+                            <td className="px-4 py-3 font-semibold text-gray-800 truncate">
+                              {a.name || "—"}
+                            </td>
 
-          {/* Clear Data Button */}
-          <button
-            onClick={() => {
-              // Replace with your real clear data logic
-              console.log("Data cleared!");
-            }}
-            className="w-full bg-red-500 text-white px-4 py-2 rounded-full flex items-center gap-2 justify-center hover:bg-red-600 cursor-pointer transition"
-          >
-            <FiTrash2 /> Clear Data
-          </button>
-        </div>
-      </section>
+                            {/* Date */}
+                            <td className="px-4 py-3 text-gray-500 text-sm whitespace-nowrap">
+                              <span className="flex flex-col sm:inline">
+                                {new Date(a.time).toLocaleDateString(
+                                  undefined,
+                                  {
+                                    dateStyle: "medium",
+                                  }
+                                )}
+                                <span className="mx-3 text-gray-300 hidden sm:inline">
+                                  •
+                                </span>
+                                <span className="sm:inline">
+                                  {new Date(a.time).toLocaleTimeString(
+                                    undefined,
+                                    {
+                                      timeStyle: "short",
+                                    }
+                                  )}
+                                </span>
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </table>
+            </div>
 
-      {/* City Locations Map */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">
-          City Locations
-        </h3>
-        <div className="w-full h-60 bg-gray-100 flex items-center justify-center rounded-md">
-          <p className="text-gray-400">🗺️ Map Placeholder</p>
-        </div>
-      </section>
+            {/* Quick Controls */}
+            <div className="bg-white p-6 rounded-lg shadow-sm flex flex-col items-stretch justify-start space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2 text-center">
+                Quick Controls
+              </h3>
+
+              {/* Add City Button */}
+              <button
+                onClick={() => setShowCityForm(true)}
+                className="w-full bg-sky-600 text-white px-4 py-2 rounded-full flex items-center gap-4 justify-center hover:bg-sky-700 transition"
+              >
+                <FiPlusCircle className="text-lg" />
+                <span className="font-medium">Add City</span>
+              </button>
+
+              {/* Add Place Button */}
+              <button
+                onClick={() => setShowPlaceForm(true)}
+                className="w-full bg-sky-600 text-white px-4 py-2 rounded-full flex items-center gap-2 justify-center hover:bg-sky-700 transition"
+              >
+                <FiMapPin className="text-lg" />
+                <span className="font-medium">Add Place</span>
+              </button>
+
+              {/* Clear Data */}
+              <button
+                onClick={() => console.log("Data cleared!")}
+                className="w-full bg-red-500 text-white px-4 py-2 rounded-full flex items-center gap-2 justify-center hover:bg-red-600 transition"
+              >
+                <FiTrash2 /> Clear Data
+              </button>
+            </div>
+          </section>
+
+          {/* Map Placeholder */}
+          <section className="bg-white p-6 rounded-lg shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              City Locations
+            </h3>
+            <div className="w-full h-60 bg-gray-100 flex items-center justify-center rounded-md">
+              <p className="text-gray-400">🗺️ Map Placeholder</p>
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
 }

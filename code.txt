@@ -1,39 +1,552 @@
 
+Old code for local storage 
+CityLists.jsx
+-----
+import React, { useState, useEffect } from "react";
+import AddCityForm from "./AddCityForm";
+import { FiTrash2, FiEdit } from "react-icons/fi";
 
-import { Link } from "react-router-dom";
-import { FiGrid, FiMapPin, FiBell, FiLogOut } from "react-icons/fi";
-import { FaCity } from "react-icons/fa";
-import { useState } from "react";
-import AddPlace from "./Places/AddPlaceForm";
-import AddCity from "./Cities/AddCityForm";
+export default function CitiesList({ cities }) {
+  // ✅ Local state for cities
+  const [localCities, setLocalCities] = useState(() => {
+    // Load from localStorage on first render
+    const saved = localStorage.getItem("citiesData");
+    return saved ? JSON.parse(saved) : [];
+  });
 
-export default function Dashboard() {
   const [showForm, setShowForm] = useState(false);
   const [editingData, setEditingData] = useState(null);
-  const [places, setPlaces] = useState([]); // <-- dynamic only, no hardcoded
 
-  const handleAddPlace = (place) => {
-    if (editingData) {
-      // update existing place
-      setPlaces((prev) =>
-        prev.map((p, idx) => (idx === editingData.index ? place : p))
+  // ✅ Sync local state with parent if passed (optional)
+  useEffect(() => {
+    if (Array.isArray(cities) && cities.length > 0) {
+      setLocalCities(cities);
+    }
+  }, [cities]);
+
+  // ✅ Save to localStorage whenever cities change
+  useEffect(() => {
+    localStorage.setItem("citiesData", JSON.stringify(localCities));
+  }, [localCities]);
+
+  const handleAddCity = (city) => {
+    if (editingData !== null) {
+      const updated = localCities.map((c, idx) =>
+        idx === editingData.index ? city : c
       );
+      setLocalCities(updated);
     } else {
-      // add new place
-      setPlaces([...places, place]);
+      setLocalCities([...localCities, city]);
     }
     setShowForm(false);
     setEditingData(null);
   };
 
-  const handleEdit = (place, index) => {
-    setEditingData({ ...place, index }); // store index for update
-    setShowForm(true);
+  const handleDeleteCity = (index) => {
+    const updated = localCities.filter((_, i) => i !== index);
+    setLocalCities(updated);
   };
 
-  const handleDelete = (index) => {
-    setPlaces((prev) => prev.filter((_, i) => i !== index));
+  return (
+    <div>
+      {!showForm ? (
+        <>
+          <section className="flex items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Cities</h1>
+            <button
+              className="ml-auto bg-sky-600 hover:bg-sky-700 text-white px-6 py-2.5 rounded-md text-sm font-medium"
+              onClick={() => setShowForm(true)}
+            >
+              Add City
+            </button>
+          </section>
+
+          <div className="bg-white rounded-lg shadow-md overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide">
+                <tr>
+                  <th className="px-4 py-3 text-left">Image</th>
+                  <th className="px-4 py-3 text-left">City Name</th>
+                  <th className="px-4 py-3 text-left">Description</th>
+                  <th className="px-4 py-3 text-left">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {localCities.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="px-4 py-6 text-center text-gray-500"
+                    >
+                      No cities added yet
+                    </td>
+                  </tr>
+                ) : (
+                  localCities.map((city, idx) => (
+                    <tr
+                      key={idx}
+                      className="border-b last:border-b-0 group hover:bg-gray-50 transition-all duration-300"
+                    >
+                      {/* Image with hover zoom + smooth layout shift */}
+                      <td className="px-4 py-3">
+                        {city.image && (
+                          <img
+                            src={city.image} // works for base64 or URL
+                            alt={city.cityName}
+                            className="w-16 h-16 object-cover rounded-md transition-all duration-500 group-hover:w-48 group-hover:h-48"
+                          />
+                        )}
+                      </td>
+
+                      <td className="px-4 py-3 font-medium text-gray-800">
+                        {city.cityName}
+                      </td>
+
+                      {/* Description column will shrink gracefully when image grows */}
+                      <td className="px-4 py-3 text-gray-700 transition-all duration-300 group-hover:w-1/2">
+                        {city.description}
+                      </td>
+
+                      <td className="px-4 py-3 flex justify-between gap-6">
+                        <button
+                          onClick={() => {
+                            setEditingData({ ...city, index: idx });
+                            setShowForm(true);
+                          }}
+                          className="bg-sky-500 text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 hover:bg-sky-600 transition"
+                        >
+                          <FiEdit /> Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCity(idx)}
+                          className="bg-red-500 text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 hover:bg-red-600 transition"
+                        >
+                          <FiTrash2 /> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <AddCityForm
+          onAddCity={handleAddCity}
+          onCancel={() => setShowForm(false)}
+          editingData={editingData}
+        />
+      )}
+    </div>
+  );
+}
+============ =========== 
+
+AddCityForm
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
+
+export default function AddCityForm({ onAddCity, onCancel, editingData }) {
+  const [form, setForm] = useState({
+    cityName: "",
+    state: "",
+    country: "",
+    description: "",
+    image: null,
+  });
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm({ ...form, image: reader.result }); // Base64 string
+      };
+      reader.readAsDataURL(file); // converts to base64
+    }
   };
+
+  // ✅ Prefill form when editing
+  useEffect(() => {
+    if (editingData) {
+      setForm(editingData);
+    }
+  }, [editingData]);
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    setForm({
+      ...form,
+      [name]: files ? files[0] : value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onAddCity(form); // send data to Dashboard
+  };
+
+  return (
+     <div className="flex items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md bg-gray-200 p-7 pt-0 rounded-lg shadow-md mt-8">
+      <h2 className="text-2xl font-semibold text-center m-4">
+        {editingData ? "Edit City" : "Add a New City"}
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* City Name */}
+        <div>
+          <label className="block font-medium text-gray-700 mb-1">
+            City Name *
+          </label>
+          <input
+            type="text"
+            name="cityName"
+            value={form.cityName}
+            onChange={handleChange}
+            placeholder="Enter city name"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+            required
+          />
+        </div>
+
+        {/* State */}
+        <div>
+          <label className="block font-medium text-gray-700 mb-1">
+            Province (State) *
+          </label>
+          <input
+            type="text"
+            name="state"
+            value={form.state}
+            onChange={handleChange}
+            placeholder="Enter state/province"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+            required
+          />
+        </div>
+
+        {/* Country */}
+        <div>
+          <label className="block font-medium text-gray-700 mb-1">
+            Country *
+          </label>
+          <input
+            type="text"
+            name="country"
+            value={form.country}
+            onChange={handleChange}
+            placeholder="Enter country"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+            required
+          />
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block font-medium text-gray-700 mb-1">
+            Description *
+          </label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            placeholder="Enter description (at least 40 characters)"
+            rows="4"
+            className="w-full border rounded-lg px-4 py-2 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-black"
+            required
+          ></textarea>
+        </div>
+
+        {/* Upload Image */}
+        <div>
+          <label className="block font-medium text-gray-700 mb-1">
+            Upload Image *
+          </label>
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleImageChange}
+            required
+            className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+          />
+        </div>
+
+        {/* Buttons */}
+        <div className="flex gap-4 pt-2">
+          <button
+            type="submit"
+            className="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-md text-sm font-medium"
+          >
+            {editingData ? "Save Changes" : "Add City"}
+          </button>
+
+          <button
+            type="button"
+            onClick={onCancel}
+            className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2.5 rounded-md text-sm font-medium"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+    </div>
+  );
+}
+
+----
+Dashboard - Oct 28
+import { FiGrid, FiMapPin, FiBell, FiLogOut } from "react-icons/fi";
+import { FaCity } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { fetchCities, fetchPlaces } from "../services/apiService";
+import PlacesList from "./Places/PlacesList";
+import CitiesList from "./Cities/CitiesList";
+import AddCityForm from "./Cities/AddCityForm";
+import NotificationsList from "./Notifications/NotificationsList";
+import DashboardOverview from "./Dashboard/DashboardOverview";
+
+export default function Dashboard() {
+  const [activeSection, setActiveSection] = useState("cities");
+  const [places, setPlaces] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [showCityForm, setShowCityForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
+
+  // Demo user
+  useEffect(() => {
+    const existingUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (!existingUser) {
+      const demoUser = {
+        name: "Laura Williams",
+        role: "Administrator",
+        email: "laura@traveladmin.com",
+        avatar: "https://i.pravatar.cc/150?img=12",
+        lastUpdated: "2 hours ago",
+      };
+      localStorage.setItem("currentUser", JSON.stringify(demoUser));
+      setUser(demoUser);
+    } else {
+      setUser(existingUser);
+    }
+  }, []);
+
+  // Fetch from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [citiesData, placesData] = await Promise.all([
+          fetchCities(),
+          fetchPlaces(),
+        ]);
+        setCities(citiesData);
+        setPlaces(placesData);
+      } catch (err) {
+        setError("Could not load data from the server.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) return <p className="text-gray-500">Loading data...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+
+  const handleAddPlace = (newPlace) => setPlaces((prev) => [...prev, newPlace]);
+  const handleAddCity = (newCity) => setCities((prev) => [...prev, newCity]);
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <aside className="w-1/5 bg-white shadow-md flex flex-col justify-between min-h-screen">
+        <div className="flex flex-col flex-grow">
+          <h1 className="p-6 text-lg font-bold text-gray-900">
+            Travel App Admin
+          </h1>
+          <nav className="flex flex-col flex-grow">
+            <button
+              onClick={() => setActiveSection("dashboard")}
+              className={`flex items-center gap-2 px-6 py-2 text-gray-700 hover:text-sky-600 ${
+                activeSection === "dashboard" ? "bg-sky-100 text-sky-600" : ""
+              }`}
+            >
+              <FiGrid /> Dashboard
+            </button>
+            <button
+              onClick={() => setActiveSection("places")}
+              className={`flex items-center gap-2 px-6 py-2 text-gray-700 hover:text-sky-600 ${
+                activeSection === "places" ? "bg-sky-100 text-sky-600" : ""
+              }`}
+            >
+              <FiMapPin /> Places
+            </button>
+            <button
+              onClick={() => {
+                setActiveSection("cities");
+                setShowCityForm(false);
+              }}
+              className={`flex items-center gap-2 px-6 py-2 text-gray-700 hover:text-sky-600 ${
+                activeSection === "cities" ? "bg-sky-100 text-sky-600" : ""
+              }`}
+            >
+              <FaCity /> Cities
+            </button>
+            <button
+              onClick={() => setActiveSection("notifications")}
+              className={`flex items-center gap-2 px-6 py-2 text-gray-700 hover:text-sky-600 ${
+                activeSection === "notifications"
+                  ? "bg-sky-100 text-sky-600"
+                  : ""
+              }`}
+            >
+              <FiBell /> Notifications
+            </button>
+          </nav>
+        </div>
+
+        {/* Logout always pinned bottom */}
+        <div className="p-6 border-t border-gray-100">
+          <button
+            onClick={() => {
+              localStorage.removeItem("isLoggedIn");
+              window.location.reload();
+            }}
+            className="flex items-center gap-2 text-gray-700 hover:text-red-600 font-medium"
+          >
+            <FiLogOut /> Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 bg-gray-100 p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm mb-6">
+          <div className="flex items-center gap-4">
+            <img
+              src={user?.avatar || "https://i.pravatar.cc/50"}
+              alt="Profile"
+              className="w-12 h-12 rounded-full"
+            />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {user?.name || "Admin User"}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {user?.role} · Last updated {user?.lastUpdated}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Conditional Content */}
+        {activeSection === "places" && (
+          <PlacesList places={places} onAdd={handleAddPlace} />
+        )}
+
+        {activeSection === "cities" && (
+          <>
+            {!showCityForm ? (
+              <CitiesList
+                cities={cities}
+                onAddNew={() => setShowCityForm(true)}
+              />
+            ) : (
+              <AddCityForm
+                onAddCity={(newCity) => {
+                  handleAddCity(newCity);
+                  setShowCityForm(false);
+                }}
+                onCancel={() => setShowCityForm(false)}
+              />
+            )}
+          </>
+        )}
+
+        {activeSection === "notifications" && <NotificationsList />}
+        {activeSection === "dashboard" && <DashboardOverview />}
+      </main>
+    </div>
+  );
+}
+
+-------
+---- Old -----
+Dashboard.jsx
+import { FiGrid, FiMapPin, FiBell, FiLogOut } from "react-icons/fi";
+import { FaCity } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { fetchCities, fetchPlaces } from "../services/apiService";
+import PlacesList from "./Places/PlacesList";
+import CitiesList from "./Cities/CitiesList";
+import AddCityForm from "./Cities/AddCityForm";
+import NotificationsList from "./Notifications/NotificationsList";
+import DashboardOverview from "./Dashboard/DashboardOverview";
+
+export default function Dashboard() {
+  const [activeSection, setActiveSection] = useState("places");
+  const [places, setPlaces] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [showCityForm, setShowCityForm] = useState(false); // ✅ new state
+  const [editingCity, setEditingCity] = useState(null); // ✅ to handle edit
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
+
+  // Load demo or saved user
+  useEffect(() => {
+    const existingUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (!existingUser) {
+      const demoUser = {
+        name: "Laura Williams",
+        role: "Administrator",
+        email: "laura@traveladmin.com",
+        avatar: "https://i.pravatar.cc/150?img=12",
+        lastUpdated: "2 hours ago",
+      };
+      localStorage.setItem("currentUser", JSON.stringify(demoUser));
+      setUser(demoUser);
+    } else setUser(existingUser);
+  }, []);
+
+  // Fetch from backend once
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [citiesData, placesData] = await Promise.all([
+          fetchCities(),
+          fetchPlaces(),
+        ]);
+        setCities(citiesData);
+        setPlaces(placesData);
+      } catch (err) {
+        setError("Could not load data from the server.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) return <p className="text-gray-500">Loading data...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+
+  // City handlers
+  const handleAddCity = (newCity) => setCities([...cities, newCity]);
+  const handleEditCity = (updated, index) =>
+    setCities((prev) => prev.map((c, i) => (i === index ? updated : c)));
+  const handleDeleteCity = (index) =>
+    setCities((prev) => prev.filter((_, i) => i !== index));
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -44,35 +557,57 @@ export default function Dashboard() {
             Travel App Admin
           </h1>
           <nav className="flex flex-col">
-            <Link
-              to="/"
-              className="flex items-center gap-2 px-6 py-2 text-gray-700 font-medium hover:bg-sky-100 hover:text-sky-600 transition-colors"
+            <button
+              onClick={() => setActiveSection("dashboard")}
+              className={`flex items-center gap-2 px-6 py-2 text-gray-700 font-medium hover:text-sky-600 text-left ${
+                activeSection === "dashboard" ? "bg-sky-100 text-sky-600" : ""
+              }`}
             >
               <FiGrid strokeWidth={3} /> Dashboard
-            </Link>
+            </button>
+
             <button
-              // onClick={() => setShowForm(false)}
-              className="flex items-center gap-2 px-6 py-2 text-gray-700 hover:bg-sky-100 hover:text-sky-600 transition-colors text-left"
+              onClick={() => setActiveSection("places")}
+              className={`flex items-center gap-2 px-6 py-2 text-gray-700 hover:text-sky-600 text-left ${
+                activeSection === "places" ? "bg-sky-100 text-sky-600" : ""
+              }`}
             >
               <FiMapPin strokeWidth={3} /> Places
             </button>
-            <Link
-              to="/"
-              className="flex items-center gap-2 px-6 py-2 text-gray-700 hover:bg-sky-100 hover:text-sky-600 transition-colors"
+
+            <button
+              onClick={() => {
+                setActiveSection("cities");
+                setShowCityForm(false); // reset to list view
+              }}
+              className={`flex items-center gap-2 px-6 py-2 text-gray-700 hover:text-sky-600 text-left ${
+                activeSection === "cities" ? "bg-sky-100 text-sky-600" : ""
+              }`}
             >
               <FaCity strokeWidth={3} /> Cities
-            </Link>
-            <Link
-              to="/notifications"
-              className="flex items-center gap-2 px-6 py-2 text-gray-700 hover:bg-sky-100 hover:text-sky-600 transition-colors"
+            </button>
+
+            <button
+              onClick={() => setActiveSection("notifications")}
+              className={`flex items-center gap-2 px-6 py-2 text-gray-700 hover:text-sky-600 text-left ${
+                activeSection === "notifications"
+                  ? "bg-sky-100 text-sky-600"
+                  : ""
+              }`}
             >
               <FiBell strokeWidth={3} /> Notifications
-            </Link>
+            </button>
           </nav>
         </div>
 
         <div className="p-6">
-          <button className="flex items-center gap-2 w-full text-left text-gray-700 font-semibold hover:text-red-600">
+          <button
+            onClick={() => {
+              localStorage.removeItem("isLoggedIn");
+              window.location.reload();
+            }}
+            className="flex items-center gap-2 w-full text-left text-gray-700 font-semibold hover:text-red-600 transition"
+          >
             <FiLogOut /> Logout
           </button>
         </div>
@@ -80,98 +615,496 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="flex-1 bg-gray-100 p-6">
-        {showForm ? (
-          <AddPlace
-            onAddPlace={handleAddPlace}
-            onCancel={() => {
-              setShowForm(false);
-              setEditingData(null);
-            }}
-            editingData={editingData}
+        {/* Admin header */}
+        <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm mb-6">
+          <div className="flex items-center gap-4">
+            <img
+              src={user?.avatar || "https://i.pravatar.cc/50"}
+              alt="Profile"
+              className="w-12 h-12 rounded-full border border-gray-200"
+            />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {user?.name}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {user?.role} · Last updated {user?.lastUpdated}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Conditional content */}
+        {activeSection === "places" && (
+          <PlacesList
+            places={places || []}
+            onAdd={handleAddPlace}
+            onEdit={handleEditPlace}
+            onDelete={handleDeletePlace}
           />
-        ) : (
+        )}
+
+        {activeSection === "cities" && (
           <>
-            {/* Profile Header */}
-            <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm mb-6">
-              <div className="flex items-center gap-4">
-                <img
-                  src="https://i.pravatar.cc/50?img=12" // placeholder avatar
-                  alt="Profile"
-                  className="w-12 h-12 rounded-full border border-gray-200"
-                />
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    Laura Williams
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    Administrator · Last updated 2 hours ago
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <section className="flex items-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">Places</h1>
-              <button
-                className="ml-auto bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-md text-sm font-medium"
-                onClick={() => {
-                  setEditingData(null);
-                  setShowForm(true);
+            {!showCityForm ? (
+              <CitiesList
+                cities={cities || []}
+                onAdd={handleAddCity}
+                onEdit={(city, index) => {
+                  setEditingCity({ ...city, index });
+                  setShowCityForm(true);
                 }}
-              >
-                Add Place
-              </button>
-            </section>
-
-            <div className="bg-white rounded-lg shadow-md overflow-x-auto">
-              <table className="w-full border-collapse text-sm">
-                <thead className="bg-gray-100 text-gray-700">
-                  <tr>
-                    <th className="px-4 py-3 text-left">Name</th>
-                    <th className="px-4 py-3 text-left">City</th>
-                    <th className="px-4 py-3 text-left">Description</th>
-                    <th className="px-4 py-3 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {places.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="4"
-                        className="px-4 py-6 text-center text-gray-500"
-                      >
-                        No places added yet
-                      </td>
-                    </tr>
-                  ) : (
-                    places.map((place, idx) => (
-                      <tr key={idx} className="border-b last:border-b-0">
-                        <td className="px-4 py-3">{place.name}</td>
-                        <td className="px-4 py-3">{place.city}</td>
-                        <td className="px-4 py-3">{place.description}</td>
-                        <td className="px-4 py-3 flex justify-between gap-6">
-                          <button
-                            onClick={() => handleEdit(place, idx)}
-                            className="text-sky-600 font-semibold hover:underline"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(idx)}
-                            className="text-red-600 font-semibold hover:underline"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                onDelete={handleDeleteCity}
+                onAddNew={() => setShowCityForm(true)} // ✅ this prop toggles form
+              />
+            ) : (
+              <AddCityForm
+                onAddCity={(newCity) => {
+                  handleAddCity(newCity);
+                  setShowCityForm(false);
+                }}
+                onCancel={() => setShowCityForm(false)}
+                editingData={editingCity}
+              />
+            )}
           </>
         )}
+
+        {activeSection === "notifications" && <NotificationsList />}
+        {activeSection === "dashboard" && <DashboardOverview />}
       </main>
+    </div>
+  );
+}
+=======
+import React, { useState, useEffect } from "react";
+
+const categories = ["Place", "Hotel", "Restaurant"];
+const certifications = ["Gold", "Silver", "Bronze"];
+
+export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
+  const [form, setForm] = useState({
+    name: "",
+    category: "",
+    city: "",
+    state: "",
+    country: "",
+    postalCode: "",
+    address: "",
+    certification: "",
+    features: "",
+    description: "",
+    phoneNumber: "",
+    email: "",
+    website: "",
+    reviewLink: "",
+    profileImage: null,
+    pictures: null,
+  });
+
+  useEffect(() => {
+    if (editingData) {
+      setForm(editingData); // prefill when editing
+    }
+  }, [editingData]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onAddPlace(form); // pass back to Dashboard
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-6 bg-gray-200 rounded-lg shadow-md m-6">
+      <h2 className="text-2xl font-semibold mb-6 text-center pb-4">
+        {editingData ? "Edit Place" : "Add a New Place"}
+      </h2>
+
+      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+        {/* Row 1 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <label className="flex flex-col font-medium text-gray-700">
+            Place Name *
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Enter place name"
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+
+          <label className="flex flex-col font-medium text-gray-700">
+            Category *
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">Select category</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* Address full width */}
+          <div className="col-span-2">
+            <label className="flex flex-col font-medium text-gray-700">
+              Address *
+              <input
+                type="text"
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+                placeholder="Enter full address"
+                required
+                className="mt-1 p-2 border border-gray-300 rounded-md text-sm w-full"
+              />
+            </label>
+          </div>
+
+          <label className="flex flex-col font-medium text-gray-700">
+            City *
+            <input
+              type="text"
+              name="city"
+              value={form.city}
+              onChange={handleChange}
+              placeholder="Enter city"
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+
+          <label className="flex flex-col font-medium text-gray-700">
+            State/Province *
+            <input
+              type="text"
+              name="state"
+              value={form.state}
+              onChange={handleChange}
+              placeholder="Enter state/province"
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+          <label className="flex flex-col font-medium text-gray-700">
+            Country *
+            <input
+              type="text"
+              name="country"
+              value={form.country}
+              onChange={handleChange}
+              placeholder="Enter country"
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+          <label className="flex flex-col font-medium text-gray-700">
+            Postal Code *
+            <input
+              type="text"
+              name="postalCode"
+              value={form.postalCode}
+              onChange={handleChange}
+              placeholder="Enter postal code"
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+
+          <label className="flex flex-col font-medium text-gray-700">
+            Features *
+            <input
+              type="text"
+              name="features"
+              value={form.features}
+              onChange={handleChange}
+              placeholder="wifi, pool, spa"
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+
+          <label className="flex flex-col font-medium text-gray-700">
+            Certification *
+            <select
+              name="certification"
+              value={form.certification}
+              onChange={handleChange}
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">Select certification</option>
+              {certifications.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {/* Row 5 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+        {/* Row 6 - Description */}
+        <div>
+          <label className="flex flex-col font-medium text-gray-700">
+            Description *
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              placeholder="Enter description (min 40 characters)"
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm resize-y min-h-[80px]"
+            />
+          </label>
+        </div>
+
+        {/* Row 7 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <label className="flex flex-col font-medium text-gray-700">
+            Phone Number *
+            <input
+              type="tel"
+              name="phoneNumber"
+              value={form.phoneNumber}
+              onChange={handleChange}
+              placeholder="Enter phone number"
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+
+          <label className="flex flex-col font-medium text-gray-700">
+            Email *
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Enter email"
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+        </div>
+
+        {/* Row 8 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <label className="flex flex-col font-medium text-gray-700">
+            Website (Optional)
+            <input
+              type="url"
+              name="website"
+              value={form.website}
+              onChange={handleChange}
+              placeholder="https://example.com"
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+
+          <label className="flex flex-col font-medium text-gray-700">
+            Review Link (Optional)
+            <input
+              type="url"
+              name="reviewLink"
+              value={form.reviewLink}
+              onChange={handleChange}
+              placeholder="https://reviews.com/place"
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+        </div>
+
+        {/* Row 9 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <label className="flex flex-col font-medium text-gray-700">
+            Profile Image *
+            <input
+              type="file"
+              name="profileImage"
+              onChange={handleChange}
+              required
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+
+          <label className="flex flex-col font-medium text-gray-700">
+            Pictures (Optional)
+            <input
+              type="file"
+              name="pictures"
+              multiple
+              onChange={handleChange}
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+          </label>
+        </div>
+
+        {/* Submit */}
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            className="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-md text-sm font-medium"
+          >
+            {editingData ? "Save Changes" : "Add Place"}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2.5 rounded-md text-sm font-medium"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+
+
+-----
+
+import React, { useState, useEffect } from "react";
+import AddPlaceForm from "./AddPlaceForm";
+import { FiTrash2, FiEdit } from "react-icons/fi";
+
+export default function PlacesList({ places }) {
+
+  const [localPlaces, setLocalPlaces] = useState(() => {
+    const saved = localStorage.getItem("placesData");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingData, setEditingData] = useState(null);
+
+  // ✅ Sync parent-provided places if they exist (optional)
+  useEffect(() => {
+    if (Array.isArray(places) && places.length > 0) {
+      setLocalPlaces(places);
+    }
+  }, [places]);
+
+  // ✅ Save to localStorage every time data changes
+  useEffect(() => {
+    localStorage.setItem("placesData", JSON.stringify(localPlaces));
+  }, [localPlaces]);
+
+  // ✅ Add or update a place
+  const handleAddPlace = (place) => {
+    if (editingData !== null) {
+      const updated = localPlaces.map((p, idx) =>
+        idx === editingData.index ? place : p
+      );
+      setLocalPlaces(updated);
+    } else {
+      setLocalPlaces([...localPlaces, place]);
+    }
+    setShowForm(false);
+    setEditingData(null);
+  };
+
+  // ✅ Delete a place
+  const handleDeletePlace = (index) => {
+    const updated = localPlaces.filter((_, i) => i !== index);
+    setLocalPlaces(updated);
+  };
+
+  return (
+    <div>
+      {!showForm ? (
+        <>
+          <section className="flex items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Places</h1>
+            <button
+              className="ml-auto bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-md text-sm font-medium"
+              onClick={() => setShowForm(true)}
+            >
+              Add Place
+            </button>
+          </section>
+
+          <div className="bg-white rounded-lg shadow-md overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide">
+                <tr>
+                  <th className="px-4 py-3 text-left">Name</th>
+                  <th className="px-4 py-3 text-left">City</th>
+                  <th className="px-4 py-3 text-left">Description</th>
+                  <th className="px-4 py-3 text-left">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {localPlaces.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="px-4 py-6 text-center text-gray-500"
+                    >
+                      No places added yet
+                    </td>
+                  </tr>
+                ) : (
+                  localPlaces.map((place, idx) => (
+                    <tr
+                      key={idx}
+                      className="border-b last:border-b-0 hover:bg-gray-50 transition-all"
+                    >
+                      <td className="px-4 py-3 font-medium text-gray-800">
+                        {place.name}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700">{place.city}</td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {place.description}
+                      </td>
+                      <td className="px-4 py-3 flex justify-between gap-6">
+                        <button
+                          onClick={() => {
+                            setEditingData({ ...place, index: idx });
+                            setShowForm(true);
+                          }}
+                          className="bg-sky-500 text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 hover:bg-sky-600 transition"
+>
+                          <FiEdit /> Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeletePlace(idx)}
+                          className="bg-red-500 text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 hover:bg-red-600 transition"
+                        >
+                          <FiTrash2 /> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <AddPlaceForm
+          onAddPlace={handleAddPlace}
+          onCancel={() => setShowForm(false)}
+          editingData={editingData}
+        />
+      )}
     </div>
   );
 }
