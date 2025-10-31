@@ -9,7 +9,7 @@ import NotificationsList from "./Notifications/NotificationsList";
 import DashboardOverview from "./Dashboard/DashboardOverview";
 
 export default function Dashboard() {
-  const [activeSection, setActiveSection] = useState("cities");
+  const [activeSection, setActiveSection] = useState("dashboard");
   const [places, setPlaces] = useState([]);
   const [cities, setCities] = useState([]);
   const [showCityForm, setShowCityForm] = useState(false);
@@ -63,7 +63,8 @@ export default function Dashboard() {
   const handleAddCity = (newCity) => setCities((prev) => [...prev, newCity]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50 relative">
+    // <div className="flex min-h-screen bg-gray-50 relative">
+    <div className="flex h-screen overflow-hidden bg-gray-50 relative">
       {/* ===== Sidebar ===== */}
       <aside
         className={`fixed md:static top-0 left-0 z-40 w-64 md:w-1/5 bg-white shadow-md flex flex-col min-h-screen transform transition-transform duration-300 ${
@@ -140,19 +141,24 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* ===== Hamburger Icon (Mobile) ===== */}
-      <button
-        className="absolute top-4 left-4 md:hidden z-50 bg-white shadow-md p-2 rounded-md"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        <FiMenu className="text-2xl text-gray-700" />
-      </button>
-
       {/* ===== Main Content ===== */}
-      <main className="flex-1 bg-gray-100 p-6 md:ml-0">
+      <main className="flex-1 bg-gray-100 p-6 md:ml-0 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm mb-6">
+          {/* Left side: Hamburger + Profile */}
           <div className="flex items-center gap-4">
+            {/* Hamburger (mobile only) */}
+            <button
+              className="md:hidden w-10 h-10 flex items-center justify-center rounded-full 
+             bg-gradient-to-br from-pink-400 via-purple-500 to-sky-400 
+             shadow-md hover:shadow-lg hover:from-pink-500 hover:to-sky-500 
+             transition-all duration-200"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
+              <FiMenu className="text-white text-xl" />
+            </button>
+
+            {/* Profile */}
             <img
               src={user?.avatar || "https://i.pravatar.cc/50"}
               alt="Profile"
@@ -170,31 +176,33 @@ export default function Dashboard() {
         </div>
 
         {/* Conditional Content */}
-        {activeSection === "places" && (
-          <PlacesList places={places} onAdd={handleAddPlace} />
-        )}
+        <div className="flex-1 overflow-y-auto pr-1">
+          {activeSection === "places" && (
+            <PlacesList places={places} onAdd={handleAddPlace} />
+          )}
 
-        {activeSection === "cities" && (
-          <>
-            {!showCityForm ? (
-              <CitiesList
-                cities={cities}
-                onAddNew={() => setShowCityForm(true)}
-              />
-            ) : (
-              <AddCityForm
-                onAddCity={(newCity) => {
-                  handleAddCity(newCity);
-                  setShowCityForm(false);
-                }}
-                onCancel={() => setShowCityForm(false)}
-              />
-            )}
-          </>
-        )}
+          {activeSection === "cities" && (
+            <>
+              {!showCityForm ? (
+                <CitiesList
+                  cities={cities}
+                  onAddNew={() => setShowCityForm(true)}
+                />
+              ) : (
+                <AddCityForm
+                  onAddCity={(newCity) => {
+                    handleAddCity(newCity);
+                    setShowCityForm(false);
+                  }}
+                  onCancel={() => setShowCityForm(false)}
+                />
+              )}
+            </>
+          )}
 
-        {activeSection === "notifications" && <NotificationsList />}
-        {activeSection === "dashboard" && <DashboardOverview />}
+          {activeSection === "notifications" && <NotificationsList />}
+          {activeSection === "dashboard" && <DashboardOverview />}
+        </div>
       </main>
     </div>
   );

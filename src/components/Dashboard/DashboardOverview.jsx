@@ -8,7 +8,10 @@ import {
   fetchCities,
   fetchPlaces,
   fetchCategories,
+  createCity,
+  createPlace,
 } from "../../services/apiService";
+import WorldMap from "../WroldMap";
 
 function getRecentActivities() {
   const stored = localStorage.getItem("recentActivities");
@@ -25,16 +28,55 @@ export default function DashboardOverview() {
 
   const [activities, setActivities] = useState([]);
 
-  const handleAddPlace = (data) => {
-    console.log("Place added:", data);
+const handleAddPlace = async (data) => {
+  try {
+    const newPlace = await createPlace(data);
+    console.log("Place added successfully:", newPlace);
+
+    // Refresh city/place counts
+    const [cities, places] = await Promise.all([fetchCities(), fetchPlaces()]);
+    setCityCount(cities.length);
+    setPlaceCount(places.length);
+
+    // Refresh recent activities
+    setActivities(getRecentActivities());
+  } catch (err) {
+    console.error("Failed to create place:", err);
+    alert("Failed to create place. Check console for details.");
+  } finally {
     setShowPlaceForm(false);
-  };
+  }
+};
 
-  const handleAddCity = (data) => {
-    console.log("City added:", data);
+// Clear the civities
+const handleClearActivities = () => {
+  if (window.confirm("Are you sure you want to clear all recent activities?")) {
+    localStorage.removeItem("recentActivities");
+    setActivities([]);
+    console.log("Recent activities cleared!");
+  }
+};
+
+
+ const handleAddCity = async (data) => {
+  try {
+    const newCity = await createCity(data);
+    console.log("City added successfully:", newCity);
+
+    // Refresh counts after adding
+    const [cities, places] = await Promise.all([fetchCities(), fetchPlaces()]);
+    setCityCount(cities.length);
+    setPlaceCount(places.length);
+
+    // Update activity log in real time
+    setActivities(getRecentActivities());
+  } catch (err) {
+    console.error("Failed to create city:", err);
+    alert("Failed to create city. Check console for details.");
+  } finally {
     setShowCityForm(false);
-  };
-
+  }
+};
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -43,6 +85,10 @@ export default function DashboardOverview() {
           fetchCities(),
           fetchPlaces(),
         ]);
+
+        console.log("Cities fetched from backend:", cities); // Testting 
+        console.log("Places fetched from backend:", places); // Testting 
+
         setCityCount(cities.length);
         setPlaceCount(places.length);
 
@@ -57,14 +103,11 @@ export default function DashboardOverview() {
     loadData();
   }, []);
 
-  // auto-refresh for activity logs
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActivities(getRecentActivities());
-    }, 3000); // refresh every 3 seconds
-
-    return () => clearInterval(interval);
-  }, []);
+  const updateActivities = () => setActivities(getRecentActivities());
+  window.addEventListener("activityUpdated", updateActivities);
+  return () => window.removeEventListener("activityUpdated", updateActivities);
+}, []);
 
   return (
     <div className="space-y-6">
@@ -76,7 +119,7 @@ export default function DashboardOverview() {
         />
       ) : showCityForm ? (
         <AddCityForm
-          onAddPlace={handleAddCity}
+          onAddCity={handleAddCity}
           onCancel={() => setShowCityForm(false)}
         />
       ) : (
@@ -164,7 +207,6 @@ export default function DashboardOverview() {
                             key={a.id}
                             className="border-t border-b transition-all duration-200"
                           >
-                            {/* Action */}
                             {/* Action */}
                             <td className="px-4 py-3 font-medium text-center sm:text-left">
                               <span
@@ -258,7 +300,7 @@ export default function DashboardOverview() {
 
               {/* Clear Data */}
               <button
-                onClick={() => console.log("Data cleared!")}
+               onClick={handleClearActivities}
                 className="w-full bg-red-500 text-white px-4 py-2 rounded-full flex items-center gap-2 justify-center hover:bg-red-600 transition"
               >
                 <FiTrash2 /> Clear Data
@@ -268,12 +310,14 @@ export default function DashboardOverview() {
 
           {/* Map Placeholder */}
           <section className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">
-              City Locations
-            </h3>
-            <div className="w-full h-60 bg-gray-100 flex items-center justify-center rounded-md">
-              <p className="text-gray-400">🗺️ Map Placeholder</p>
-            </div>
+            <WorldMap
+              cities={[
+                { name: "Toronto", latitude: 43.7, longitude: -79.42 },
+                { name: "London", latitude: 51.5, longitude: -0.12 },
+                { name: "Tokyo", latitude: 35.68, longitude: 139.76 },
+                { name: "Dubai", latitude: 25.27, longitude: 55.3 },
+              ]}
+            />
           </section>
         </>
       )}

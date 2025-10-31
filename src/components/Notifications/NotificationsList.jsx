@@ -49,7 +49,6 @@ export default function NotificationsList() {
             <table className="w-full border-collapse text-sm">
               <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide">
                 <tr>
-                  <th className="px-4 py-3 text-left w-16">Image</th>
                   <th className="px-4 py-3 text-left">Title</th>
                   <th className="px-4 py-3 text-left">Description</th>
                   <th className="px-4 py-3 text-left">Category</th>
@@ -73,15 +72,6 @@ export default function NotificationsList() {
                       key={idx}
                       className="border-b last:border-b-0 hover:bg-gray-50 transition-all duration-300"
                     >
-                      {/* Image */}
-                      <td className="px-4 py-3">
-                        <img
-                          src={note.image}
-                          alt="notification"
-                          className="w-10 h-10 rounded-md object-cover border border-gray-200"
-                        />
-                      </td>
-
                       {/* Title */}
                       <td className="px-4 py-3 font-semibold text-gray-800">
                         {note.title}

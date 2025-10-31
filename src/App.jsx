@@ -8,10 +8,7 @@ export default function App() {
   return (
     <LoginGate>
       <Routes>
-        {/* Dashboard page */}
         <Route path="/" element={<Dashboard />} />
-
-        {/* Add Place page */}
         <Route path="/add-place" element={<AddPlace />} />
         <Route path="/add-city" element={<AddCity />} />
         <Route path="/notifications" element={<AddCity />} />

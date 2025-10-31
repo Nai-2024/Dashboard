@@ -101,22 +101,6 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
               className="w-full border rounded-lg px-4 py-2 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-black"
             ></textarea>
           </div>
-
-          {/* Image */}
-          <div>
-            <label className="block font-medium text-gray-700 mb-1">
-              Upload Image <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              name="image"
-              onChange={handleChange}
-              required
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
-            />
-          </div>
-
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <button
