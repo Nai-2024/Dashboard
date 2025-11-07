@@ -1,3 +1,229 @@
+
+  ============== Acivity ==========
+  code for backend acvity log once the API is ready
+
+  import { BASE_URL } from "../config";
+
+export async function fetchActivities() {
+  const res = await fetch(`${BASE_URL}/api/activities`);
+  return await res.json();
+}
+
+export async function logActivity(action, type, name) {
+  await fetch(`${BASE_URL}/api/activities`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, type, name }),
+  });
+  window.dispatchEvent(new Event("activityUpdated"));
+}
+
+export async function clearActivities() {
+  await fetch(`${BASE_URL}/api/activities`, { method: "DELETE" });
+  window.dispatchEvent(new Event("activityUpdated"));
+}
+
+
+  ===== =======
+  const handleAddPlace = async (place) => {
+    try {
+      setLoading(true);
+      if (editingData) {
+        const updatedPlace = await updatePlace(editingData._id, place);
+        setLocalPlaces((prev) =>
+          prev.map((p, i) => (i === editingData.index ? updatedPlace : p))
+        );
+      } else {
+        const newPlace = await createPlace(place);
+        setLocalPlaces((prev) => [...prev, newPlace]);
+      }
+      setShowForm(false);
+      setEditingData(null);
+    } catch (err) {
+      console.error("Save failed:", err);
+      alert("Failed to save place. Check console for details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+====
+
+CityList- Nov 04
+import React, { useState, useEffect } from "react";
+import AddCityForm from "./AddCityForm";
+import { FiTrash2, FiEdit } from "react-icons/fi";
+import { createCity, updateCity, deleteCity } from "../../services/apiService";
+
+export default function CitiesList({ cities }) {
+  const [localCities, setLocalCities] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingData, setEditingData] = useState(null);
+
+  // Sync cities from props to local state
+  useEffect(() => {
+    if (Array.isArray(cities) && cities.length > 0) {
+      setLocalCities(cities);
+    }
+  }, [cities]);
+
+  // Add or update city
+  const handleAddCity = async (city) => {
+    try {
+      if (editingData) {
+        const updatedCity = await updateCity(editingData._id, city);
+        setLocalCities((prev) =>
+          prev.map((c, idx) => (idx === editingData.index ? updatedCity : c))
+        );
+      } else {
+        const newCity = await createCity(city);
+        setLocalCities((prev) => [...prev, newCity]);
+      }
+
+      setShowForm(false);
+      setEditingData(null);
+    } catch (err) {
+      console.error("Save failed:", err);
+      alert("Failed to save city.");
+    }
+  };
+
+  // Delete city
+  const handleDeleteCity = async (index) => {
+    const city = localCities[index];
+    if (!window.confirm(`Are you sure you want to delete ${city.cityName}?`))
+      return;
+
+    try {
+      await deleteCity(city._id, city);
+      setLocalCities((prev) => prev.filter((_, i) => i !== index));
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Failed to delete city.");
+    }
+  };
+
+  return (
+    <div>
+      {!showForm ? (
+        <>
+          {/* Header Section */}
+          <section className="flex items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Cities</h1>
+            <button
+              className="ml-auto bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-md text-sm font-medium"
+              onClick={() => {
+                setEditingData(null);
+                setShowForm(true);
+              }}
+            >
+              Add City
+            </button>
+          </section>
+
+          {/* Table Section */}
+          <div className="bg-white rounded-lg shadow-md overflow-x-auto">
+            <table className="w-full border-collapse text-sm table-fixed">
+              <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide">
+                <tr>
+                  <th className="px-5 py-3 text-left w-[12%]">Image</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left w-[12%]">
+                    City Name
+                  </th>
+                  <th className="px-4 py-3 text-left w-[66%]">Description</th>
+                  <th className="px-4 py-3 text-left w-[10%]">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {localCities.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="px-4 py-6 text-center text-gray-500"
+                    >
+                      No cities added yet
+                    </td>
+                  </tr>
+                ) : (
+                  localCities.map((city, idx) => (
+                    <tr
+                      key={city._id || idx}
+                      className="border-b last:border-b-0 hover:bg-gray-50 transition-all"
+                    >
+                      {/* Image Column */}
+                      <td className="px-4 py-3 text-left align-top">
+                        <div className="flex flex-col items-start">
+                          {/* Image */}
+                          {city.image ? (
+                            <img
+                              src={city.image}
+                              alt={city.cityName}
+                              className="w-[120px] h-[90px] object-cover rounded-md shadow-sm ml-2"
+                            />
+                          ) : (
+                            <div className="w-[80px] h-[80px] bg-gray-200 rounded-md ml-2" />
+                          )}
+
+                          {/* City Name below image for tablet & mobile only */}
+                          <div className="mt-2 md:hidden font-semibold text-gray-800 text-sm ml-2">
+                            {city.cityName}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* City Name (desktop) */}
+                      <td className="px-4 py-3 font-semibold text-gray-800 align-top">
+                        {city.cityName}
+                      </td>
+
+                      {/* Description */}
+                      <td className="px-4 py-3 text-gray-600 align-top break-words">
+                        {city.description}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-4 py-3 align-top">
+                        <div className="flex flex-wrap gap-2 justify-start">
+                          <button
+                            onClick={() => {
+                              setEditingData({
+                                ...city,
+                                index: idx,
+                                _id: city._id,
+                              });
+                              setShowForm(true);
+                            }}
+                            className="bg-sky-500 text-white px-3 py-1.5 rounded-[10px] text-sm font-medium flex items-center justify-center gap-1 hover:bg-sky-600 transition min-w-[80px]"
+                          >
+                            <FiEdit /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCity(idx)}
+                            className="bg-red-500 text-white px-3 py-1.5 rounded-[10px] text-sm font-medium flex items-center justify-center gap-1 hover:bg-red-600 transition min-w-[80px]"
+                          >
+                            <FiTrash2 /> Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <AddCityForm
+          onAddCity={handleAddCity}
+          onCancel={() => setShowForm(false)}
+          editingData={editingData}
+        />
+      )}
+    </div>
+  );
+}
+
+------
 PlacelIST 31 Oct
 
 import React, { useState, useEffect } from "react";

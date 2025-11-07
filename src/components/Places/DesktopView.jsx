@@ -5,7 +5,7 @@ export default function DesktopView({ places, onEdit, onDelete }) {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-x-auto">
       {/* Scrollable section for table body */}
-      <div className="max-h-[70vh] overflow-y-auto">
+
         <table className="w-full border-collapse text-sm">
           {/* Sticky table header */}
           <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide sticky top-0 z-10">
@@ -69,6 +69,6 @@ export default function DesktopView({ places, onEdit, onDelete }) {
           </tbody>
         </table>
       </div>
-    </div>
+  
   );
 }

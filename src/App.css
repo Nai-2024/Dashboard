@@ -40,3 +40,20 @@
 .read-the-docs {
   color: #888;
 }
+
+/* prevent selection/blue bars while dragging on SVG */
+.rsm-svg, .rsm-svg * {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* remove focus outlines on country paths */
+.rsm-geographies path {
+  outline: none;
+}
+
+/* ensure the wrapper never shows a scroll bar while panning */
+.map-container {
+  overflow: hidden;
+}

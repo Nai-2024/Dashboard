@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./components/Dashboard/Dashboard";
 import AddPlace from "./components/Places/AddPlaceForm";
 import AddCity from "./components/Cities/AddCityForm";
 import LoginGate from "./components/Authentication/LoginGate";

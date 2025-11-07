@@ -4,12 +4,11 @@ export default function TabletView({ places, onEdit, onDelete }) {
   // one class so both badges stay identical
   const BADGE_BASE =
     "inline-flex items-center justify-center h-6 px-3 rounded-full text-xs font-medium whitespace-nowrap " +
-    "w-[96px]"; 
+    "w-[96px]";
   return (
-   <div className="bg-white rounded-lg shadow-md overflow-x-auto">
-  <div className="max-h-[70vh] overflow-y-auto">
-    <table className="w-full border-collapse text-sm">
-      <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide sticky top-0 z-10">
+    <div className="bg-white rounded-lg shadow-md overflow-x-auto">
+      <table className="w-full border-collapse text-sm">
+        <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide sticky top-0 z-10">
           <tr>
             <th className="px-4 py-3 text-left w-[35%]">Place Info</th>
             <th className="py-3 text-left w-[55%]">Description</th>
@@ -102,7 +101,6 @@ export default function TabletView({ places, onEdit, onDelete }) {
           )}
         </tbody>
       </table>
-    </div>
     </div>
   );
 }

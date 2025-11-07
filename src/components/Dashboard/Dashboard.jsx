@@ -1,12 +1,13 @@
 import { FiGrid, FiMapPin, FiBell, FiLogOut, FiMenu } from "react-icons/fi";
 import { FaCity } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { fetchCities, fetchPlaces } from "../services/apiService";
-import PlacesList from "./Places/PlacesList";
-import CitiesList from "./Cities/CitiesList";
-import AddCityForm from "./Cities/AddCityForm";
-import NotificationsList from "./Notifications/NotificationsList";
-import DashboardOverview from "./Dashboard/DashboardOverview";
+import { fetchCities } from "../../services/api/citiesService";
+import { fetchPlaces } from "../../services/api/placesService";
+import PlacesList from "../Places/PlacesList";
+import CitiesList from "../Cities/CitiesList";
+import AddCityForm from "../Cities/AddCityForm";
+import NotificationsList from "../Notifications/NotificationsList";
+import DashboardOverview from "./DashboardOverview";
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -63,8 +64,7 @@ export default function Dashboard() {
   const handleAddCity = (newCity) => setCities((prev) => [...prev, newCity]);
 
   return (
-    // <div className="flex min-h-screen bg-gray-50 relative">
-    <div className="flex h-screen overflow-hidden bg-gray-50 relative">
+    <div className="flex min-h-screen bg-gray-50 relative">
       {/* ===== Sidebar ===== */}
       <aside
         className={`fixed md:static top-0 left-0 z-40 w-64 md:w-1/5 bg-white shadow-md flex flex-col min-h-screen transform transition-transform duration-300 ${

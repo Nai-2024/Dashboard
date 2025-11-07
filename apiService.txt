@@ -1,4 +1,7 @@
+// Core of backend communication
+
 import { BASE_URL } from "../config";
+import { logActivity } from "./activityService";
 
 // Fetch all cities
 export async function fetchCities() {
@@ -23,56 +26,51 @@ export async function createCity(cityData) {
   formData.append("country", cityData.country);
   formData.append("description", cityData.description);
 
-  // if uploading actual file
+  // if uploading actual file in the form of image
   if (cityData.image instanceof File) {
     formData.append("profile", cityData.image);
   }
 
-  const res = await fetch(`${BASE_URL}/api/cities`, {
+  const response = await fetch(`${BASE_URL}/api/cities`, {
     method: "POST",
     body: formData,
   });
 
-  if (!res.ok) throw new Error("Failed to add city");
-  const data = await res.json();
+  if (!response.ok) throw new Error("Failed to add city");
+  const data = await response.json();
   logActivity("Added", "City", cityData.cityName || cityData.name);
   return data;
 }
 
 // Update existing city
 export async function updateCity(id, cityData) {
-  const formData = new FormData();
-  formData.append("name", cityData.cityName);
-  formData.append("city", cityData.cityName);
-  formData.append("country", cityData.country);
-  formData.append("description", cityData.description);
+  console.log("No update endpoint found. Recreating city instead…");
 
-  if (cityData.image instanceof File) {
-    formData.append("profile", cityData.image);
+  // Step 1 — Delete old city if it exists
+  try {
+    await deleteCity(id, cityData);
+    console.log("Old city deleted:", id);
+  } catch (err) {
+    console.warn("City delete failed (may not exist):", err.message);
   }
 
-  // ✅ Standard: use PUT for updates
-  const res = await fetch(`${BASE_URL}/api/cities/${id}`, {
-    method: "PUT",
-    body: formData,
-  });
+  // Step 2 — Create new city with updated data
+  const newCity = await createCity(cityData);
 
-  if (!res.ok) throw new Error("Failed to update city");
-
-  const data = await res.json();
-
-  // Log the action (optional)
+  // Log as "Updated" instead of "Added"
   logActivity("Updated", "City", cityData.cityName || cityData.name);
+
+  console.log("City re-created:", newCity);
+
+  // Refresh dashboard instantly
   window.dispatchEvent(new Event("activityUpdated"));
 
-  return data;
+  return newCity;
 }
 
 
-
-
 // Delete a city
-export async function deleteCity(id, cityData) {
+export async function deleteCity(id, cityData = {}) {
   const res = await fetch(`${BASE_URL}/api/cities/${id}`, { method: "DELETE" });
 
   if (res.status === 404) {
@@ -87,13 +85,24 @@ export async function deleteCity(id, cityData) {
   }
 
   const data = await res.json();
-  logActivity(
-    "Deleted",
-    "City",
-    cityData?.cityName || cityData?.name || "Unknown"
-  );
+
+  // Determine the name intelligently
+  const name =
+    cityData?.cityName ||
+    cityData?.name ||
+    data?.name ||
+    data?.city ||
+    id ||
+    "Unknown";
+
+  logActivity("Deleted", "City", name);
+
+  // Instantly refresh dashboard activities (no manual reload)
+  window.dispatchEvent(new Event("activityUpdated"));
+
   return data;
 }
+
 
 // =========== Places ================ //
 
@@ -104,17 +113,18 @@ export async function fetchPlaces() {
   return await res.json();
 }
 
-// Create a new place (with image upload)
+// This function just talks to the server. Sends an HTTP POST request to /api/places.
 export async function createPlace(placeData) {
   const formData = new FormData();
 
   formData.append("name", placeData.name);
   formData.append("category", placeData.category);
+  formData.append("address", placeData.address);
   formData.append("city", placeData.city);
   formData.append("state", placeData.state);
   formData.append("country", placeData.country);
   formData.append("postalCode", placeData.postalCode);
-  formData.append("address", placeData.address);
+  //formData.append("features", placeData.features);
   formData.append("certification", placeData.certification);
   formData.append("description", placeData.description);
   formData.append("phoneNumber", placeData.phoneNumber);
@@ -122,7 +132,7 @@ export async function createPlace(placeData) {
   formData.append("website", placeData.website || "");
   formData.append("reviewLink", placeData.reviewLink || "");
 
-  // convert "wifi, pool" -> ["wifi", "pool"]
+  // Handle both single and multiple features
   if (typeof placeData.features === "string") {
     const featuresArray = placeData.features
       .split(",")
@@ -133,16 +143,9 @@ export async function createPlace(placeData) {
     formData.append("features", JSON.stringify(placeData.features || []));
   }
 
-  // profile image (backend expects "profile")
+  // profile image
   if (placeData.profileImage instanceof File) {
     formData.append("profile", placeData.profileImage);
-  }
-
-  // multiple pictures
-  if (placeData.pictures && placeData.pictures.length > 0) {
-    Array.from(placeData.pictures).forEach((pic) =>
-      formData.append("pictures", pic)
-    );
   }
 
   const res = await fetch(`${BASE_URL}/api/places`, {
@@ -161,7 +164,7 @@ export async function createPlace(placeData) {
   return data;
 }
 
-// Update existing place (with image upload support)
+// Update existing place
 export async function updatePlace(id, placeData) {
   console.log("Updating place with ID:", id);
 
@@ -181,6 +184,7 @@ export async function updatePlace(id, placeData) {
   formData.append("website", placeData.website || "");
   formData.append("reviewLink", placeData.reviewLink || "");
 
+  // Handle both single and multiple features
   if (typeof placeData.features === "string") {
     const featuresArray = placeData.features
       .split(",")
@@ -190,15 +194,9 @@ export async function updatePlace(id, placeData) {
   } else {
     formData.append("features", JSON.stringify(placeData.features || []));
   }
-
+  //image update
   if (placeData.profileImage instanceof File) {
     formData.append("profile", placeData.profileImage);
-  }
-
-  if (placeData.pictures && placeData.pictures.length > 0) {
-    Array.from(placeData.pictures).forEach((pic) =>
-      formData.append("pictures", pic)
-    );
   }
 
   const res = await fetch(`${BASE_URL}/api/places/${id}`, {
@@ -214,7 +212,6 @@ export async function updatePlace(id, placeData) {
 
   const data = await res.json();
 
-  // FIX: always use placeData.name (not placeData.placeName)
   logActivity("Updated", "Place", placeData.name || "Unknown");
 
   // Instantly tell dashboard to refresh
@@ -251,9 +248,9 @@ export async function deletePlace(id, placeData) {
   return data;
 }
 
-
 // ========= Categories ============ //
-// Fetch all categories
+
+// Fetch categories
 export async function fetchCategories() {
   const res = await fetch(`${BASE_URL}/api/categories`);
   if (!res.ok) throw new Error("Failed to fetch categories");
@@ -266,27 +263,7 @@ export async function fetchCategories() {
   }));
 }
 
-// ============ Acivity log  =========== //
-function logActivity(action, type, name) {
-  const activities = JSON.parse(
-    localStorage.getItem("recentActivities") || "[]"
-  );
-  const newActivity = {
-    id: Date.now(),
-    action,
-    type,
-    name,
-    time: new Date().toISOString(),
-  };
-  localStorage.setItem(
-    "recentActivities",
-    JSON.stringify([newActivity, ...activities].slice(0, 10))
-  );
-  // Notify dashboard to refresh immediately
-  window.dispatchEvent(new Event("activityUpdated"));
-}
-
-// ============ Acivity log  =========== //
+// ============ Fetcher user  =========== //
 export async function fetchUsers() {
   try {
     const response = await fetch(`${BASE_URL}/api/users`);
@@ -302,6 +279,7 @@ export async function fetchUsers() {
 }
 
 // ============ Notification =========== //
+
 // Fetch all notifications
 export async function fetchNotifications() {
   const res = await fetch(`${BASE_URL}/notifications`);
@@ -330,23 +308,29 @@ export async function deleteNotification(id) {
 }
 
 // =========== Google Map========= //
-// Convert city name + country → latitude & longitude using OpenStreetMap
 export async function geocodeCity(cityName, country) {
   try {
-    const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
       cityName
-    )}&country=${encodeURIComponent(country)}&format=json&limit=1`;
+    )}&count=1&language=en&format=json`;
+
     const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch coordinates");
+
     const data = await res.json();
 
-    if (data.length > 0) {
+    if (data && data.results && data.results.length > 0) {
+      const result = data.results[0];
       return {
-        latitude: parseFloat(data[0].lat),
-        longitude: parseFloat(data[0].lon),
+        latitude: result.latitude,
+        longitude: result.longitude,
       };
+    } else {
+      console.warn("No coordinates found for:", cityName, country);
     }
   } catch (err) {
     console.error("Geocoding failed:", err);
   }
+
   return null;
 }

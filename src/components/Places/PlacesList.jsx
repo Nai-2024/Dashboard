@@ -5,7 +5,8 @@ import AddPlaceForm from "./AddPlaceForm";
 import PlaceView from "./DesktopView";
 import TabletView from "./TabletView";
 import MobileView from "./MobileView";
-import { createPlace, deletePlace, updatePlace } from "../../services/apiService";
+import {deletePlace, updatePlace } from "../../services/api/placesService";
+import { handleCreatePlace } from "../../services/dataHandlers";
 
 export default function PlacesList({ places }) {
   const [localPlaces, setLocalPlaces] = useState([]);
@@ -27,28 +28,38 @@ export default function PlacesList({ places }) {
     }
   }, [places]);
 
-  const handleAddPlace = async (place) => {
-    try {
-      setLoading(true);
-      if (editingData) {
-        const updatedPlace = await updatePlace(editingData._id, place);
-        setLocalPlaces((prev) =>
-          prev.map((p, i) => (i === editingData.index ? updatedPlace : p))
-        );
-      } else {
-        const newPlace = await createPlace(place);
-        setLocalPlaces((prev) => [...prev, newPlace]);
+  // Add place function
+const handleAddPlace = async (place) => {
+  try {
+    if (editingData) {
+      // If editing, call updatePlace
+      const placeId = editingData._id || editingData.id;
+      if (!placeId) {
+        alert("Cannot update — missing place ID.");
+        return;
       }
-      setShowForm(false);
-      setEditingData(null);
-    } catch (err) {
-      console.error("Save failed:", err);
-      alert("Failed to save place. Check console for details.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
+      const updated = await updatePlace(placeId, place);
+      setLocalPlaces((prev) =>
+        prev.map((p) => (p._id === placeId ? updated : p))
+      );
+
+      alert("Place updated successfully!");
+    } else {
+      // Otherwise, create new
+      await handleCreatePlace(place, { setLocalPlaces });
+    }
+
+    setShowForm(false);
+    setEditingData(null);
+  } catch (err) {
+    console.error("Save failed:", err);
+    alert("Failed to save changes. Check console for details.");
+  }
+};
+
+
+// Delete place function
   const handleDeletePlace = async (index, id) => {
     if (!window.confirm("Are you sure you want to delete this place?")) return;
     try {
@@ -63,18 +74,24 @@ export default function PlacesList({ places }) {
     }
   };
 
+  // Edit handler
+const handleEditPlace = (place) => {
+  setEditingData(place);  // store the place data for editing
+  setShowForm(true);      // open AddPlaceForm
+};
+
   const renderLayout = () => {
     if (width >= 1024) {
       return (
-        <PlaceView places={localPlaces} onEdit={setEditingData} onDelete={handleDeletePlace} />
+      <PlaceView places={localPlaces} onEdit={handleEditPlace} onDelete={handleDeletePlace} />
       );
     } else if (width >= 640 && width < 1024) {
       return (
-        <TabletView places={localPlaces} onEdit={setEditingData} onDelete={handleDeletePlace} />
+       <TabletView places={localPlaces} onEdit={handleEditPlace} onDelete={handleDeletePlace} />
       );
     } else {
       return (
-        <MobileView places={localPlaces} onEdit={setEditingData} onDelete={handleDeletePlace} />
+       <MobileView places={localPlaces} onEdit={handleEditPlace} onDelete={handleDeletePlace} />
       );
     }
   };

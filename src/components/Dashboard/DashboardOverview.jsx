@@ -4,19 +4,13 @@ import { FaCity } from "react-icons/fa";
 import { HiOutlineViewGrid, HiOutlineUser } from "react-icons/hi";
 import AddPlaceForm from "../Places/AddPlaceForm";
 import AddCityForm from "../Cities/AddCityForm";
-import {
-  fetchCities,
-  fetchPlaces,
-  fetchCategories,
-  createCity,
-  createPlace,
-} from "../../services/apiService";
-import WorldMap from "../WroldMap";
-
-function getRecentActivities() {
-  const stored = localStorage.getItem("recentActivities");
-  return stored ? JSON.parse(stored) : [];
-}
+import { fetchCities, createCity } from "../../services/api/citiesService";
+import { fetchPlaces } from "../../services/api/placesService";
+import { fetchUsers } from "../../services/api/userService";
+// import fetchCategories from "../../services/api/catagoriesService";
+import WorldMapLeaflet from "../../map/WorldMapLeaflet";
+import {fetchActivities, clearActivities} from "../../services/activityService";
+import { handleCreatePlace, safeFetch } from "../../services/dataHandlers";
 
 export default function DashboardOverview() {
   const [showPlaceForm, setShowPlaceForm] = useState(false);
@@ -25,89 +19,96 @@ export default function DashboardOverview() {
   const [placeCount, setPlaceCount] = useState(0);
   const [categoryCount, setCategoryCount] = useState(0);
   const [loading, setLoading] = useState(true);
-
   const [activities, setActivities] = useState([]);
+  const [citiesData, setCitiesData] = useState([]);
+  const [userCount, setUserCount] = useState(0);
 
-const handleAddPlace = async (data) => {
-  try {
-    const newPlace = await createPlace(data);
-    console.log("Place added successfully:", newPlace);
+  // Fetch and update all counts (cities, places, categories)
+  const loadCounts = async () => {
+    try {
+      setLoading(true);
+      const [cities, places, users, categories] = await Promise.all([
+        safeFetch(fetchCities),
+        safeFetch(fetchPlaces),
+        safeFetch(fetchUsers),
+        // fetchCategories(),
+      ]);
+      setCitiesData(cities);
+      console.log("Cities fetched:", cities);
+      setCityCount(cities.length);
+      setPlaceCount(places.length);
+      // setCategoryCount(categories.length);
+      setUserCount(users.length);
+      console.log("Users fetched:", users.length);
+      console.log("Cities fetched:", cities.length);
+      console.log("Places fetched:", places.length);
+      // console.log("Catagories fetched:", categories.length);
+    } catch (err) {
+      console.error("Failed to load counts:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Refresh city/place counts
-    const [cities, places] = await Promise.all([fetchCities(), fetchPlaces()]);
-    setCityCount(cities.length);
-    setPlaceCount(places.length);
+  // Adds new place
+  const handleAddPlace = async (data) => {
+    try {
+      await handleCreatePlace(data);
+      await loadCounts();
+      loadActivities();
+    } catch (err) {
+      console.error("Failed to create place:", err);
+    } finally {
+      setShowPlaceForm(false);
+    }
+  };
 
-    // Refresh recent activities
-    setActivities(getRecentActivities());
-  } catch (err) {
-    console.error("Failed to create place:", err);
-    alert("Failed to create place. Check console for details.");
-  } finally {
-    setShowPlaceForm(false);
-  }
-};
+  // Adds new city
+  const handleAddCity = async (data) => {
+    try {
+      await createCity(data);
+      await loadCounts();
+      loadActivities();
+    } catch (err) {
+      console.error("Failed to create city:", err);
+      alert("Failed to create city. Check console for details.");
+    } finally {
+      setShowCityForm(false);
+    }
+  };
 
-// Clear the civities
-const handleClearActivities = () => {
-  if (window.confirm("Are you sure you want to clear all recent activities?")) {
-    localStorage.removeItem("recentActivities");
-    setActivities([]);
-    console.log("Recent activities cleared!");
-  }
-};
+  // Clear acvity
+  const handleClearActivities = () => {
+    if (
+      window.confirm("Are you sure you want to clear all recent activities?")
+    ) {
+      clearActivities(); // Deletes everything from localStorage
+      setActivities([]); // Clears from dashboard state too
+    }
+  };
 
+  // This function’s purpose is to load (read) the existing activities from localStorage (or later, from the backend).
+  const loadActivities = () => {
+    const logs = fetchActivities();
+    setActivities(logs);
+  };
 
- const handleAddCity = async (data) => {
-  try {
-    const newCity = await createCity(data);
-    console.log("City added successfully:", newCity);
-
-    // Refresh counts after adding
-    const [cities, places] = await Promise.all([fetchCities(), fetchPlaces()]);
-    setCityCount(cities.length);
-    setPlaceCount(places.length);
-
-    // Update activity log in real time
-    setActivities(getRecentActivities());
-  } catch (err) {
-    console.error("Failed to create city:", err);
-    alert("Failed to create city. Check console for details.");
-  } finally {
-    setShowCityForm(false);
-  }
-};
+  // Load counts + activities on first render
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [cities, places] = await Promise.all([
-          fetchCities(),
-          fetchPlaces(),
-        ]);
-
-        console.log("Cities fetched from backend:", cities); // Testting 
-        console.log("Places fetched from backend:", places); // Testting 
-
-        setCityCount(cities.length);
-        setPlaceCount(places.length);
-
-        //  Load recent activity log
-        setActivities(getRecentActivities());
-      } catch (err) {
-        console.error("Failed to fetch dashboard stats:", err);
-      } finally {
-        setLoading(false);
-      }
+    const init = async () => {
+      await loadCounts();
+      loadActivities();
     };
-    loadData();
+    init();
   }, []);
 
+  // Update activities in real time when other components trigger "activityUpdated"
   useEffect(() => {
-  const updateActivities = () => setActivities(getRecentActivities());
-  window.addEventListener("activityUpdated", updateActivities);
-  return () => window.removeEventListener("activityUpdated", updateActivities);
-}, []);
+    const updateActivities = () => loadActivities();
+    window.addEventListener("activityUpdated", updateActivities);
+    return () =>
+      window.removeEventListener("activityUpdated", updateActivities);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -166,8 +167,9 @@ const handleClearActivities = () => {
                 <HiOutlineUser className="text-sky-600 text-2xl" />
               </div>
               <p className="text-sm text-gray-500">Users</p>
+              {/*<h2 className="text-xl font-semibold text-gray-900 mt-1">1</h2> */}
               <h2 className="text-xl font-semibold text-gray-900 mt-1">
-                1,000
+                {loading ? "..." : userCount}
               </h2>
             </div>
           </section>
@@ -179,99 +181,95 @@ const handleClearActivities = () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-3">
                 Recent Activity
               </h3>
-              <table className="w-full text-sm text-gray-700">
-                <div className="overflow-x-auto rounded-md">
-                  <table className="min-w-full text-sm text-gray-700 table-fixed">
-                    <thead className="bg-gray-100 text-gray-600 text-sm font-semibold">
+
+              <div className="overflow-x-auto rounded-md">
+                <table className="min-w-full text-sm text-gray-700 table-fixed">
+                  <thead className="bg-gray-100 text-gray-600 text-sm font-semibold">
+                    <tr>
+                      <th className="px-4 py-3 w-1/4 text-left">Action</th>
+                      <th className="px-4 py-3 w-1/4 text-left">Type</th>
+                      <th className="px-4 py-3 w-1/4 text-left">Name</th>
+                      <th className="px-4 py-3 w-1/4 text-left">Date</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {activities.length === 0 ? (
                       <tr>
-                        <th className="px-4 py-3 w-1/4 text-left">Action</th>
-                        <th className="px-4 py-3 w-1/4 text-left">Type</th>
-                        <th className="px-4 py-3 w-1/4 text-left">Name</th>
-                        <th className="px-4 py-3 w-1/4 text-left">Date</th>
+                        <td
+                          colSpan="4"
+                          className="text-center py-6 text-gray-400 italic bg-gray-50 rounded-md"
+                        >
+                          No recent activity yet
+                        </td>
                       </tr>
-                    </thead>
-
-                    <tbody>
-                      {activities.length === 0 ? (
-                        <tr>
-                          <td
-                            colSpan="4"
-                            className="text-center py-6 text-gray-400 italic bg-gray-50 rounded-md"
-                          >
-                            No recent activity yet
-                          </td>
-                        </tr>
-                      ) : (
-                        activities.map((a) => (
-                          <tr
-                            key={a.id}
-                            className="border-t border-b transition-all duration-200"
-                          >
-                            {/* Action */}
-                            <td className="px-4 py-3 font-medium text-center sm:text-left">
+                    ) : (
+                      activities.map((a) => (
+                        <tr
+                          key={a.id}
+                          className="border-t border-b transition-all duration-200"
+                        >
+                          {/* Action */}
+                          <td className="px-4 py-3 font-medium text-center sm:text-left">
+                            <span
+                              className={`inline-flex items-center justify-center gap-2 ${
+                                a.action === "Deleted"
+                                  ? "text-red-600"
+                                  : a.action === "Updated"
+                                  ? "text-blue-600"
+                                  : "text-green-600"
+                              }`}
+                            >
                               <span
-                                className={`inline-flex items-center justify-center gap-2 ${
+                                className={`w-2.5 h-2.5 rounded-full ${
                                   a.action === "Deleted"
-                                    ? "text-red-600"
+                                    ? "bg-red-500"
                                     : a.action === "Updated"
-                                    ? "text-blue-600"
-                                    : "text-green-600"
+                                    ? "bg-blue-500"
+                                    : "bg-green-500"
                                 }`}
-                              >
-                                <span
-                                  className={`w-2.5 h-2.5 rounded-full ${
-                                    a.action === "Deleted"
-                                      ? "bg-red-500"
-                                      : a.action === "Updated"
-                                      ? "bg-blue-500"
-                                      : "bg-green-500"
-                                  }`}
-                                ></span>
-                                <span className="capitalize">{a.action}</span>
+                              ></span>
+                              <span className="capitalize">{a.action}</span>
+                            </span>
+                          </td>
+
+                          {/* Type */}
+                          <td className="px-4 py-3">
+                            <span className="px-2 py-1 text-xs text-gray-600">
+                              {a.type}
+                            </span>
+                          </td>
+
+                          {/* Name */}
+                          <td className="px-4 py-3 font-semibold text-gray-800 truncate">
+                            {a.name || "—"}
+                          </td>
+
+                          {/* Date */}
+                          <td className="px-4 py-3 text-gray-500 text-sm whitespace-nowrap">
+                            <span className="flex flex-col sm:inline">
+                              {new Date(a.time).toLocaleDateString(undefined, {
+                                dateStyle: "medium",
+                              })}
+                              <span className="mx-3 text-gray-300 hidden sm:inline">
+                                •
                               </span>
-                            </td>
-
-                            {/* Type */}
-                            <td className="px-4 py-3">
-                              <span className="px-2 py-1 text-xs text-gray-600">
-                                {a.type}
-                              </span>
-                            </td>
-
-                            {/* Name */}
-                            <td className="px-4 py-3 font-semibold text-gray-800 truncate">
-                              {a.name || "—"}
-                            </td>
-
-                            {/* Date */}
-                            <td className="px-4 py-3 text-gray-500 text-sm whitespace-nowrap">
-                              <span className="flex flex-col sm:inline">
-                                {new Date(a.time).toLocaleDateString(
+                              <span className="sm:inline">
+                                {new Date(a.time).toLocaleTimeString(
                                   undefined,
                                   {
-                                    dateStyle: "medium",
+                                    timeStyle: "short",
                                   }
                                 )}
-                                <span className="mx-3 text-gray-300 hidden sm:inline">
-                                  •
-                                </span>
-                                <span className="sm:inline">
-                                  {new Date(a.time).toLocaleTimeString(
-                                    undefined,
-                                    {
-                                      timeStyle: "short",
-                                    }
-                                  )}
-                                </span>
                               </span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </table>
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Quick Controls */}
@@ -300,7 +298,7 @@ const handleClearActivities = () => {
 
               {/* Clear Data */}
               <button
-               onClick={handleClearActivities}
+                onClick={handleClearActivities}
                 className="w-full bg-red-500 text-white px-4 py-2 rounded-full flex items-center gap-2 justify-center hover:bg-red-600 transition"
               >
                 <FiTrash2 /> Clear Data
@@ -310,14 +308,7 @@ const handleClearActivities = () => {
 
           {/* Map Placeholder */}
           <section className="bg-white p-6 rounded-lg shadow-sm">
-            <WorldMap
-              cities={[
-                { name: "Toronto", latitude: 43.7, longitude: -79.42 },
-                { name: "London", latitude: 51.5, longitude: -0.12 },
-                { name: "Tokyo", latitude: 35.68, longitude: 139.76 },
-                { name: "Dubai", latitude: 25.27, longitude: 55.3 },
-              ]}
-            />
+            <WorldMapLeaflet cities={citiesData} />
           </section>
         </>
       )}
