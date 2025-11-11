@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from "react";
 
+// Validation regex patterns
+const NAME_REGEX = /^[A-Za-z\s-]+$/; // For name, city, state
+const COUNTRY_REGEX = /^[A-Za-z\s]+$/; // For country
+const POSTAL_CODE_REGEX = /^[A-Za-z0-9\s-]{3,10}$/; // Supports all kind of postal codes
+const PHONE_REGEX = /^[0-9+\-\s]{7,15}$/; // Phone (digits, +, -, spaces)
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Email format
+const URL_REGEX = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/\S*)?$/; // Optional https://
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_IMAGE_SIZE_MB = 2; // 2 MB limit
+const FEATURES_REGEX = /^[A-Za-z\s,]+$/;
+
 const categories = ["Place", "Hotel", "Restaurant"];
 const certifications = ["Gold", "Silver", "Bronze"];
 
+// form’s data model
 export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
   const [form, setForm] = useState({
     name: "",
@@ -23,8 +35,10 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
     pictures: null,
   });
 
+  // errors State – Handling Validation Messages
+  const [errors, setErrors] = useState({});
+
   // Prefill form when editing
-// ✅ Prefill form when editing
   useEffect(() => {
     if (editingData) {
       setForm({
@@ -71,26 +85,97 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
     }
   }, [editingData]);
 
-
-   // ✅ Handle input change (text, select, textarea)
+  // Handle text and select input changes with capitalization
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    let newValue = value;
+  // Automatically capitalizes the first lette
+    if (["name", "city", "state", "country"].includes(name)) {
+      newValue = value.charAt(0).toUpperCase() + value.slice(1);
+    }
+  // Converts postal code to uppercase
+    if (name === "postalCode") {
+      newValue = value.toUpperCase();
+    }
+    // Uses setForm to update the state immutably.
+    setForm((prev) => ({ ...prev, [name]: newValue }));
   };
 
-  // ✅ Handle image upload
+  // Manage file uploads for profileImage. If multiple files are selected, stores the array. If a single file is selected, stores just that one file object.
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    setForm((prev) => ({ ...prev, [name]: files.length > 1 ? files : files[0] }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: files.length > 1 ? files : files[0],
+    }));
   };
 
-  // ✅ Submit form
+  // Validation logic
+  const validate = () => {
+    const newErrors = {};
+
+    if (!form.name || !NAME_REGEX.test(form.name))
+      newErrors.name = "Name should contain only letters, spaces, or hyphens.";
+
+    if (!form.city || !NAME_REGEX.test(form.city))
+      newErrors.city = "City name should contain only letters or spaces.";
+
+    if (!form.state || !NAME_REGEX.test(form.state))
+      newErrors.state = "State should contain only letters or spaces.";
+
+    if (!form.country || !COUNTRY_REGEX.test(form.country))
+      newErrors.country = "Country should contain only letters or spaces.";
+
+    if (!form.description || form.description.trim().length < 40)
+      newErrors.description = "Description must be at least 40 characters.";
+
+    if (!form.phoneNumber || !PHONE_REGEX.test(form.phoneNumber))
+      newErrors.phoneNumber = "Enter a valid phone number (7–15 digits).";
+
+    if (!form.features || !FEATURES_REGEX.test(form.features))
+      newErrors.features =
+        "Features should be a comma-separated list (e.g. wifi, pool, spa).";
+
+    if (!form.email || !EMAIL_REGEX.test(form.email))
+      newErrors.email = "Enter a valid email address.";
+
+    if (form.website && !URL_REGEX.test(form.website))
+      newErrors.website = "Enter a valid website URL (with or without https).";
+
+    if (form.reviewLink && !URL_REGEX.test(form.reviewLink))
+      newErrors.reviewLink = "Enter a valid review link URL.";
+
+    if (form.postalCode && !POSTAL_CODE_REGEX.test(form.postalCode))
+      newErrors.postalCode = "Invalid postal code format.";
+
+    // Image validation
+    if (!editingData && !form.profileImage)
+      newErrors.profileImage = "Profile image is required.";
+    else if (form.profileImage) {
+      if (!ALLOWED_IMAGE_TYPES.includes(form.profileImage.type))
+        newErrors.profileImage = "Only JPG, PNG, or WEBP files allowed.";
+      else if (form.profileImage.size > MAX_IMAGE_SIZE_MB * 1024 * 1024)
+        newErrors.profileImage = "Image must be under 2MB.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Final Form Submission
   const handleSubmit = (e) => {
-    e.preventDefault();
-    onAddPlace(form);
+    e.preventDefault(); // Prevents page refresh (e.preventDefault()).
+    if (validate()) { // validate 
+      const cleanedFeatures = form.features // if valid Cleans up features (turns “Wifi, Pool, Spa” → ["wifi", "pool", "spa"]).
+        .split(",")
+        .map((f) => f.trim().toLowerCase())
+        .filter((f) => f.length > 0);
+
+      onAddPlace({ ...form, features: cleanedFeatures }); // Calls the parent function onAddPlace() and passes the cleaned form data for saving.
+    }
   };
 
-return (
+  return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-200 rounded-lg shadow-md m-6">
       <h2 className="text-2xl font-semibold mb-6 text-center pb-4">
         {editingData ? "Edit Place" : "Add a New Place"}
@@ -108,9 +193,12 @@ return (
               value={form.name}
               onChange={handleChange}
               placeholder="Enter place name"
-              required
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              required
             />
+            {errors.name && (
+              <p className="text-red-600 text-sm">{errors.name}</p>
+            )}
           </label>
 
           {/* Category */}
@@ -142,8 +230,8 @@ return (
                 value={form.address}
                 onChange={handleChange}
                 placeholder="Enter full address"
-                required
                 className="mt-1 p-2 border border-gray-300 rounded-md text-sm w-full"
+                required
               />
             </label>
           </div>
@@ -157,9 +245,12 @@ return (
               value={form.city}
               onChange={handleChange}
               placeholder="Enter city"
-              required
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              required
             />
+            {errors.city && (
+              <p className="text-red-600 text-sm">{errors.city}</p>
+            )}
           </label>
 
           {/* State */}
@@ -171,9 +262,12 @@ return (
               value={form.state}
               onChange={handleChange}
               placeholder="Enter state/province"
-              required
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              required
             />
+            {errors.state && (
+              <p className="text-red-600 text-sm">{errors.state}</p>
+            )}
           </label>
 
           {/* Country */}
@@ -185,9 +279,12 @@ return (
               value={form.country}
               onChange={handleChange}
               placeholder="Enter country"
-              required
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              required
             />
+            {errors.country && (
+              <p className="text-red-600 text-sm">{errors.country}</p>
+            )}
           </label>
 
           {/* Postal Code */}
@@ -199,9 +296,12 @@ return (
               value={form.postalCode}
               onChange={handleChange}
               placeholder="Enter postal code"
-              required
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              required
             />
+            {errors.postalCode && (
+              <p className="text-red-600 text-sm">{errors.postalCode}</p>
+            )}
           </label>
 
           {/* Features */}
@@ -213,8 +313,8 @@ return (
               value={form.features}
               onChange={handleChange}
               placeholder="wifi, pool, spa"
-              required
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              required
             />
           </label>
 
@@ -247,9 +347,12 @@ return (
               value={form.description}
               onChange={handleChange}
               placeholder="Enter description (min 40 characters)"
-              required
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm resize-y min-h-[80px]"
+              required
             />
+            {errors.description && (
+              <p className="text-red-600 text-sm">{errors.description}</p>
+            )}
           </label>
         </div>
 
@@ -263,9 +366,12 @@ return (
               value={form.phoneNumber}
               onChange={handleChange}
               placeholder="Enter phone number"
-              required
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              required
             />
+            {errors.phoneNumber && (
+              <p className="text-red-600 text-sm">{errors.phoneNumber}</p>
+            )}
           </label>
 
           <label className="flex flex-col font-medium text-gray-700">
@@ -276,9 +382,12 @@ return (
               value={form.email}
               onChange={handleChange}
               placeholder="Enter email"
-              required
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              required
             />
+            {errors.email && (
+              <p className="text-red-600 text-sm">{errors.email}</p>
+            )}
           </label>
         </div>
 
@@ -294,6 +403,9 @@ return (
               placeholder="https://example.com"
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
             />
+            {errors.website && (
+              <p className="text-red-600 text-sm">{errors.website}</p>
+            )}
           </label>
 
           <label className="flex flex-col font-medium text-gray-700">
@@ -306,6 +418,9 @@ return (
               placeholder="https://reviews.com/place"
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
             />
+            {errors.reviewLink && (
+              <p className="text-red-600 text-sm">{errors.reviewLink}</p>
+            )}
           </label>
         </div>
 
@@ -317,9 +432,12 @@ return (
               type="file"
               name="profileImage"
               onChange={handleFileChange}
-              required={!editingData} // Only required for new places
+              required={!editingData}
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
             />
+            {errors.profileImage && (
+              <p className="text-red-600 text-sm">{errors.profileImage}</p>
+            )}
           </label>
 
           <label className="flex flex-col font-medium text-gray-700">

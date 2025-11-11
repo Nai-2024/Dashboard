@@ -42,7 +42,8 @@ export async function createCity(cityData) {
   return data;
 }
 
-// Update existing city
+// Update existing city with out having proper api. 
+// Note: It should be replaced once we we get the api
 export async function updateCity(id, cityData) {
   console.log("No update endpoint found. Recreating city instead…");
 
@@ -68,6 +69,34 @@ export async function updateCity(id, cityData) {
   return newCity;
 }
 
+// This is the alternate for updating city that is applicable after we have correct api for updating city
+{/*
+export async function updateCity(id, cityData) {
+  const formData = new FormData();
+  formData.append("name", cityData.cityName);
+  formData.append("city", cityData.cityName);
+  formData.append("country", cityData.country);
+  formData.append("description", cityData.description);
+
+  if (cityData.image instanceof File) {
+    formData.append("profile", cityData.image);
+  }
+
+  const response = await fetch(`${BASE_URL}/api/cities/${id}`, {
+    method: "PUT", // or PATCH, depending on your backend
+    body: formData,
+  });
+
+  if (!response.ok) throw new Error("Failed to update city");
+  const data = await response.json();
+
+  logActivity("Updated", "City", cityData.cityName || cityData.name);
+  window.dispatchEvent(new Event("activityUpdated"));
+
+  return data;
+}
+
+*/}
 
 // Delete a city
 export async function deleteCity(id, cityData = {}) {
