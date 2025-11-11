@@ -8,11 +8,16 @@ export default function LoginGate({ children }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // useEffect Hook — Check if user is already logged in when component loads
+  // If localStorage shows "isLoggedIn" as true, bypass login and show dashboard.
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     if (loggedIn) setAuthorized(true);
   }, []);
 
+  // Handle admin login process
+  // Step 1: Validate that both username and password are entered.
+  // Step 2: Show loading state and clear any previous error.
   const handleLogin = async () => {
     if (!username || !password) {
       setError("Please enter username and password.");
@@ -22,6 +27,8 @@ export default function LoginGate({ children }) {
     setLoading(true);
     setError("");
 
+    // Step 3: Send API request using Basic Auth header
+    // The btoa() function encodes username and password into Base64 for HTTP header.
     try {
       const res = await fetch(`${BASE_URL}/api/protected`, {
         headers: {
@@ -29,19 +36,28 @@ export default function LoginGate({ children }) {
         },
       });
 
+      // Step 4: Handle the backend response
+      // If successful, store login status in localStorage and show dashboard.
+      // Otherwise, display an invalid login message.
       if (res.ok) {
         localStorage.setItem("isLoggedIn", "true");
         setAuthorized(true);
       } else {
         setError("Invalid username or password.");
       }
+
+      // Step 5: Handle any network or server errors
+      // If request fails (e.g. no internet), show a friendly error.
     } catch {
       setError("Server error. Please try again later.");
+
+      // Step 6: Stop the loading spinner no matter success or error.
     } finally {
       setLoading(false);
     }
   };
 
+  // If user is already authorized, show the protected dashboard content (children)
   if (authorized) return children;
 
   return (
