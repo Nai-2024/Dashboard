@@ -19,21 +19,17 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar toggle state
 
-  // Demo user
+  // User
   useEffect(() => {
-    const existingUser = JSON.parse(localStorage.getItem("currentUser"));
-    if (!existingUser) {
-      const demoUser = {
-        name: "Laura Williams",
+    const username = localStorage.getItem("username");
+
+    if (username) {
+      setUser({
+        name: username.charAt(0).toUpperCase() + username.slice(1),
         role: "Administrator",
-        email: "laura@traveladmin.com",
-        avatar: "https://i.pravatar.cc/150?img=12",
-        lastUpdated: "2 hours ago",
-      };
-      localStorage.setItem("currentUser", JSON.stringify(demoUser));
-      setUser(demoUser);
-    } else {
-      setUser(existingUser);
+        avatar: "/default-avatar.png",
+        lastUpdated: "Just now",
+      });
     }
   }, []);
 
@@ -159,11 +155,10 @@ export default function Dashboard() {
             </button>
 
             {/* Profile */}
-            <img
-              src={user?.avatar || "https://i.pravatar.cc/50"}
-              alt="Profile"
-              className="w-12 h-12 rounded-full"
-            />
+            <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-white text-lg font-semibold">
+              {user?.name?.charAt(0).toUpperCase()}
+            </div>
+
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
                 {user?.name || "Admin User"}
@@ -201,7 +196,7 @@ export default function Dashboard() {
           )}
 
           {activeSection === "notifications" && <NotificationsList />}
-          {activeSection === "dashboard" && <DashboardOverview />}
+          {activeSection === "dashboard" && <DashboardOverview user={user} />}
         </div>
       </main>
     </div>

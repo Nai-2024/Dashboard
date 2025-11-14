@@ -1,15 +1,16 @@
-
 import { BASE_URL } from "../../config";
 
-// Fetch categories
+// Extract categories from existing places API
 export async function fetchCategories() {
-  const res = await fetch(`${BASE_URL}/api/categories`);
-  if (!res.ok) throw new Error("Failed to fetch categories");
-  const data = await res.json();
+  const res = await fetch(`${BASE_URL}/api/places`);
+  if (!res.ok) throw new Error("Failed to fetch places");
 
-  return data.map((cat) => ({
-    _id: cat._id,
-    name: cat.name,
-    description: cat.description || "",
+  const places = await res.json();
+
+  // Extract unique categories
+  const uniqueCategories = [...new Set(places.map((p) => p.category))];
+
+  return uniqueCategories.map((cat) => ({
+    name: cat,
   }));
 }

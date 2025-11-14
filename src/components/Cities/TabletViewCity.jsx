@@ -1,7 +1,7 @@
 import React from "react";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
 
-export default function TabletView({ cities, onEdit, onDelete }) {
+export default function TabletView({ cities, onDelete }) {
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
       {/* Header (simulating thead style) */}
@@ -15,7 +15,7 @@ export default function TabletView({ cities, onEdit, onDelete }) {
         {cities.map((city, idx) => (
           <div
             key={idx}
-            className="p-4 flex items-start gap-4 hover:bg-gray-50 transition-all"
+            className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-all"
           >
             {/* Image */}
             <img
@@ -36,13 +36,7 @@ export default function TabletView({ cities, onEdit, onDelete }) {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-2 ml-2 items-end min-w-[90px]">
-              <button
-                onClick={() => onEdit(city, idx)}
-                className="flex items-center justify-center gap-1 bg-sky-500 hover:bg-sky-600 text-white w-[90px] py-1.5 rounded-md text-sm font-medium transition"
-              >
-                <FiEdit /> Edit
-              </button>
+            <div className="flex flex-col gap-2 ml-2 items-center justify-center min-w-[90px]">
               <button
                 onClick={() => onDelete(idx)}
                 className="flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 text-white w-[90px] py-1.5 rounded-md text-sm font-medium transition"

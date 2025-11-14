@@ -1,13 +1,12 @@
 import React from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 
-export default function MobilePlaceView({ places, onEdit, onDelete }) {
+export default function MobilePlaceView({ places, setSelectedPlace }) {
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
       {/* Header */}
       <div className="bg-sky-100 text-sky-800 font-semibold tracking-wide grid grid-cols-[1fr_90px] items-center px-4 py-3 border-b border-sky-200">
         <span>Place Info</span>
-        <span className="justify-self-start">Actions</span>
       </div>
 
       {/* Place Cards */}
@@ -63,18 +62,12 @@ export default function MobilePlaceView({ places, onEdit, onDelete }) {
               </p>
 
               {/* Actions */}
-              <div className="flex gap-2 mt-3">
+              <div className="flex w-full mt-3">
                 <button
-                  onClick={() => onEdit({ ...place, index: idx })}
-                  className="flex-1 flex items-center justify-center gap-1 bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-md text-sm font-medium transition"
+                  onClick={() => setSelectedPlace(place)}
+                  className="w-full bg-blue-500 text-white py-2 rounded-md text-sm font-medium hover:bg-blue-600 transition flex items-center justify-center gap-2"
                 >
-                  <FiEdit /> Edit
-                </button>
-                <button
-                  onClick={() => onDelete(idx, place._id)}
-                  className="flex-1 flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-sm font-medium transition"
-                >
-                  <FiTrash2 /> Delete
+                  <span>View</span>
                 </button>
               </div>
             </div>

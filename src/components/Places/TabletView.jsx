@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function TabletView({ places, onEdit, onDelete }) {
+export default function TabletView({ places, setSelectedPlace }) {
   // one class so both badges stay identical
   const BADGE_BASE =
     "inline-flex items-center justify-center h-6 px-3 rounded-full text-xs font-medium whitespace-nowrap " +
@@ -80,19 +80,14 @@ export default function TabletView({ places, onEdit, onDelete }) {
                 </td>
 
                 {/* -------- ACTIONS -------- */}
-                <td className="px-4 py-4 align-top">
-                  <div className="flex flex-col justify-start items-start gap-2">
+                <td className="px-4 py-4">
+                  <div className="flex w-full justify-center">
+                    {/* VIEW BUTTON – opens modal */}
                     <button
-                      onClick={() => onEdit({ ...place, index: idx })}
-                      className="bg-sky-500 text-white px-4 py-1.5 rounded-[10px] text-sm font-medium text-center hover:bg-sky-600 transition w-[80px]"
+                      onClick={() => setSelectedPlace(place)}
+                      className="bg-blue-500 text-white px-4 py-1.5 rounded-[10px] text-sm font-medium text-center hover:bg-blue-600 transition w-[80px]"
                     >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => onDelete(idx, place._id)}
-                      className="bg-red-500 text-white px-4 py-1.5 rounded-[10px] text-sm font-medium text-center hover:bg-red-600 transition w-[80px]"
-                    >
-                      Delete
+                      View
                     </button>
                   </div>
                 </td>

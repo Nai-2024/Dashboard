@@ -1,12 +1,11 @@
-
-
 import React, { useState, useEffect } from "react";
 import AddPlaceForm from "./AddPlaceForm";
-import PlaceView from "./DesktopView";
+import DesktopView from "./DesktopView";
 import TabletView from "./TabletView";
 import MobileView from "./MobileView";
-import {deletePlace, updatePlace } from "../../services/api/placesService";
+import { deletePlace, updatePlace } from "../../services/api/placesService";
 import { handleCreatePlace } from "../../services/dataHandlers";
+import PlaceDetailsModel from "./PlaceDetailsModel";
 
 export default function PlacesList({ places }) {
   const [localPlaces, setLocalPlaces] = useState([]);
@@ -14,6 +13,7 @@ export default function PlacesList({ places }) {
   const [editingData, setEditingData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [width, setWidth] = useState(window.innerWidth);
+  const [selectedPlace, setSelectedPlace] = useState(null);
 
   // Track screen size
   useEffect(() => {
@@ -23,49 +23,57 @@ export default function PlacesList({ places }) {
   }, []);
 
   useEffect(() => {
-    if (Array.isArray(places) && places.length > 0) {
-      setLocalPlaces(places);
-    }
+    setLocalPlaces(places || []);
   }, [places]);
 
-  // Add place function
-const handleAddPlace = async (place) => {
-  try {
-    if (editingData) {
-      // If editing, call updatePlace
-      const placeId = editingData._id || editingData.id;
-      if (!placeId) {
-        alert("Cannot update — missing place ID.");
-        return;
+  // ADD (NEW) or UPDATE (EDIT)
+  const handleAddPlace = async (place) => {
+    try {
+      if (editingData) {
+        // Editing
+        const placeId = editingData._id;
+        if (!placeId) {
+          alert("Cannot update — missing place ID.");
+          return;
+        }
+
+        const updated = await updatePlace(placeId, place);
+
+        setLocalPlaces((prev) =>
+          prev.map((p) => (p._id === placeId ? updated : p))
+        );
+
+        alert("Place updated successfully!");
+      } else {
+        // Creating new
+        await handleCreatePlace(place, { setLocalPlaces });
+        alert("Place added successfully!");
       }
 
-      const updated = await updatePlace(placeId, place);
-      setLocalPlaces((prev) =>
-        prev.map((p) => (p._id === placeId ? updated : p))
-      );
-
-      alert("Place updated successfully!");
-    } else {
-      // Otherwise, create new
-      await handleCreatePlace(place, { setLocalPlaces });
+      setShowForm(false);
+      setEditingData(null);
+    } catch (err) {
+      console.error("Save failed:", err);
+      alert("Failed to save changes. Check console for details.");
     }
+  };
 
-    setShowForm(false);
-    setEditingData(null);
-  } catch (err) {
-    console.error("Save failed:", err);
-    alert("Failed to save changes. Check console for details.");
-  }
-};
-
-
-// Delete place function
-  const handleDeletePlace = async (index, id) => {
+  // Delete place function
+  const handleDeletePlace = async (place) => {
     if (!window.confirm("Are you sure you want to delete this place?")) return;
+
     try {
       setLoading(true);
-      await deletePlace(id, localPlaces[index]);
-      setLocalPlaces((prev) => prev.filter((_, i) => i !== index));
+
+      await deletePlace(place._id, place);
+
+      // Remove deleted place from list
+      setLocalPlaces((prev) => prev.filter((p) => p._id !== place._id));
+
+      // If modal is open, close it
+      setSelectedPlace(null);
+
+      alert("Place deleted successfully!");
     } catch (err) {
       console.error("Delete failed:", err);
       alert("Failed to delete place. Check console for details.");
@@ -75,23 +83,32 @@ const handleAddPlace = async (place) => {
   };
 
   // Edit handler
-const handleEditPlace = (place) => {
-  setEditingData(place);  // store the place data for editing
-  setShowForm(true);      // open AddPlaceForm
-};
+  const handleEditPlace = (place) => {
+    if (!place._id) {
+      alert("Cannot edit — missing ID");
+      return;
+    }
+    setEditingData(place);
+    setShowForm(true);
+  };
 
   const renderLayout = () => {
     if (width >= 1024) {
       return (
-      <PlaceView places={localPlaces} onEdit={handleEditPlace} onDelete={handleDeletePlace} />
+        <DesktopView
+          places={localPlaces}
+          onEdit={handleEditPlace}
+          onDelete={handleDeletePlace}
+          setSelectedPlace={setSelectedPlace}
+        />
       );
     } else if (width >= 640 && width < 1024) {
       return (
-       <TabletView places={localPlaces} onEdit={handleEditPlace} onDelete={handleDeletePlace} />
+        <TabletView places={localPlaces} setSelectedPlace={setSelectedPlace} />
       );
     } else {
       return (
-       <MobileView places={localPlaces} onEdit={handleEditPlace} onDelete={handleDeletePlace} />
+        <MobileView places={localPlaces} setSelectedPlace={setSelectedPlace} />
       );
     }
   };
@@ -120,6 +137,14 @@ const handleEditPlace = (place) => {
           onAddPlace={handleAddPlace}
           onCancel={() => setShowForm(false)}
           editingData={editingData}
+        />
+      )}
+      {selectedPlace && (
+        <PlaceDetailsModel
+          place={selectedPlace}
+          onClose={() => setSelectedPlace(null)}
+          onEdit={handleEditPlace}
+          onDelete={handleDeletePlace}
         />
       )}
     </div>

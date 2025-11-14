@@ -6,11 +6,13 @@ import AddPlaceForm from "../Places/AddPlaceForm";
 import AddCityForm from "../Cities/AddCityForm";
 import { fetchCities, createCity } from "../../services/api/citiesService";
 import { fetchPlaces } from "../../services/api/placesService";
-import { fetchUsers } from "../../services/api/userService";
-// import fetchCategories from "../../services/api/catagoriesService";
 import WorldMapLeaflet from "../../map/WorldMapLeaflet";
-import {fetchActivities, clearActivities} from "../../services/activityService";
+import {
+  fetchActivities,
+  clearActivities,
+} from "../../services/activityService";
 import { handleCreatePlace, safeFetch } from "../../services/dataHandlers";
+import { fetchCategories } from "../../services/api/catagoriesService";
 
 export default function DashboardOverview() {
   const [showPlaceForm, setShowPlaceForm] = useState(false);
@@ -21,28 +23,25 @@ export default function DashboardOverview() {
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState([]);
   const [citiesData, setCitiesData] = useState([]);
-  const [userCount, setUserCount] = useState(0);
 
   // Fetch and update all counts (cities, places, categories)
   const loadCounts = async () => {
     try {
       setLoading(true);
-      const [cities, places, users, categories] = await Promise.all([
+      const [cities, places, categories] = await Promise.all([
         safeFetch(fetchCities),
         safeFetch(fetchPlaces),
-        safeFetch(fetchUsers),
-        // fetchCategories(),
+        fetchCategories(),
       ]);
       setCitiesData(cities);
       console.log("Cities fetched:", cities);
       setCityCount(cities.length);
       setPlaceCount(places.length);
-      // setCategoryCount(categories.length);
-      setUserCount(users.length);
-      console.log("Users fetched:", users.length);
+      setCategoryCount(categories.length);
+      setCategoryCount(categories.length);
       console.log("Cities fetched:", cities.length);
       console.log("Places fetched:", places.length);
-      // console.log("Catagories fetched:", categories.length);
+      console.log("Categories fetched:", categories);
     } catch (err) {
       console.error("Failed to load counts:", err);
     } finally {
@@ -167,9 +166,8 @@ export default function DashboardOverview() {
                 <HiOutlineUser className="text-sky-600 text-2xl" />
               </div>
               <p className="text-sm text-gray-500">Users</p>
-              {/*<h2 className="text-xl font-semibold text-gray-900 mt-1">1</h2> */}
               <h2 className="text-xl font-semibold text-gray-900 mt-1">
-                {loading ? "..." : userCount}
+                {loading ? "..." : 1}
               </h2>
             </div>
           </section>

@@ -1,13 +1,12 @@
 import React from "react";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
 
-export default function MobileViewCity({ cities, onEdit, onDelete }) {
+export default function MobileViewCity({ cities, onDelete }) {
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
       {/* Header */}
       <div className="bg-sky-100 text-sky-800 font-semibold tracking-wide grid grid-cols-[1fr_90px] items-center px-4 py-3 border-b border-sky-200">
         <span>City Info</span>
-        <span className="justify-self-start">Actions</span>
       </div>
 
       {/* City Cards */}
@@ -36,12 +35,6 @@ export default function MobileViewCity({ cities, onEdit, onDelete }) {
 
             {/* Action Buttons */}
             <div className="flex gap-2 mt-3">
-              <button
-                onClick={() => onEdit(city, idx)}
-                className="flex-1 flex items-center justify-center gap-1 bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-md text-sm font-medium transition"
-              >
-                <FiEdit /> Edit
-              </button>
               <button
                 onClick={() => onDelete(idx)}
                 className="flex-1 flex items-center justify-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-sm font-medium transition"

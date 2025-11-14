@@ -4,12 +4,11 @@ import React, { useState, useEffect } from "react";
 const NAME_REGEX = /^[A-Za-z\s-]+$/; // For name, city, state
 const COUNTRY_REGEX = /^[A-Za-z\s]+$/; // For country
 const POSTAL_CODE_REGEX = /^[A-Za-z0-9\s-]{3,10}$/; // Supports all kind of postal codes
-const PHONE_REGEX = /^[0-9+\-\s]{7,15}$/; // Phone (digits, +, -, spaces)
+const PHONE_REGEX = /^[0-9+\-\s]{7,20}$/; // Phone (digits, +, -, spaces)
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Email format
 const URL_REGEX = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/\S*)?$/; // Optional https://
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_SIZE_MB = 2; // 2 MB limit
-const FEATURES_REGEX = /^[A-Za-z\s,]+$/;
 
 const categories = ["Place", "Hotel", "Restaurant"];
 const certifications = ["Gold", "Silver", "Bronze"];
@@ -59,7 +58,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
         email: editingData.email || "",
         website: editingData.website || "",
         reviewLink: editingData.reviewLink || "",
-        profileImage: null, // reset to allow new file upload
+        profileImage: null,
         pictures: null,
       });
     } else {
@@ -89,11 +88,11 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     let newValue = value;
-  // Automatically capitalizes the first lette
+    // Automatically capitalizes the first lette
     if (["name", "city", "state", "country"].includes(name)) {
       newValue = value.charAt(0).toUpperCase() + value.slice(1);
     }
-  // Converts postal code to uppercase
+    // Converts postal code to uppercase
     if (name === "postalCode") {
       newValue = value.toUpperCase();
     }
@@ -104,9 +103,10 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
   // Manage file uploads for profileImage. If multiple files are selected, stores the array. If a single file is selected, stores just that one file object.
   const handleFileChange = (e) => {
     const { name, files } = e.target;
+
     setForm((prev) => ({
       ...prev,
-      [name]: files.length > 1 ? files : files[0],
+      [name]: name === "pictures" ? files : files[0],
     }));
   };
 
@@ -130,11 +130,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
       newErrors.description = "Description must be at least 40 characters.";
 
     if (!form.phoneNumber || !PHONE_REGEX.test(form.phoneNumber))
-      newErrors.phoneNumber = "Enter a valid phone number (7–15 digits).";
-
-    if (!form.features || !FEATURES_REGEX.test(form.features))
-      newErrors.features =
-        "Features should be a comma-separated list (e.g. wifi, pool, spa).";
+      newErrors.phoneNumber = "Enter a valid phone number (7–20 digits).";
 
     if (!form.email || !EMAIL_REGEX.test(form.email))
       newErrors.email = "Enter a valid email address.";
@@ -165,10 +161,11 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
   // Final Form Submission
   const handleSubmit = (e) => {
     e.preventDefault(); // Prevents page refresh (e.preventDefault()).
-    if (validate()) { // validate 
+    if (validate()) {
+      // validate
       const cleanedFeatures = form.features // if valid Cleans up features (turns “Wifi, Pool, Spa” → ["wifi", "pool", "spa"]).
         .split(",")
-        .map((f) => f.trim().toLowerCase())
+        .map((f) => f.trim())
         .filter((f) => f.length > 0);
 
       onAddPlace({ ...form, features: cleanedFeatures }); // Calls the parent function onAddPlace() and passes the cleaned form data for saving.
@@ -347,7 +344,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.description}
               onChange={handleChange}
               placeholder="Enter description (min 40 characters)"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm resize-y min-h-[80px]"
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm resize-y min-h-[200px]"
               required
             />
             {errors.description && (

@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-export default function AddCityForm({ onAddCity, onCancel, editingData }) {
-  
+export default function AddCityForm({ onAddCity, onCancel }) {
   // This stores the user’s input (form data).
   // form holds all values: city name, country, description, and image.
   // setForm updates those values whenever the user types or uploads an image.
@@ -16,13 +15,8 @@ export default function AddCityForm({ onAddCity, onCancel, editingData }) {
   // Example: if city name is invalid → errors.cityName = "Invalid name".
   const [errors, setErrors] = useState({});
 
-  // Prefill form if editing
-  useEffect(() => {
-    if (editingData) setForm(editingData);
-  }, [editingData]);
-
-  // Image handler - This function takes the image file that the user picks and saves it into your form state (form.image), 
-  // so it can later be sent to your backend or Firestore when the user clicks Add City or Save Changes.
+  // Image handler - This function takes the image file that the user picks and saves it into your form state (form.image),
+  // so it can later be sent to your backend or Firestore when the user clicks Add City.
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -32,79 +26,83 @@ export default function AddCityForm({ onAddCity, onCancel, editingData }) {
 
   // Updates your form every time the user types something.
   // It automatically formats the city name with a capital letter and keeps the form state in sync with what’s shown on the screen.
-const handleChange = (e) => {
-  const { name, value } = e.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-  let newValue = value;
+    let newValue = value;
 
-  // Capitalize first letter for cityName
-  if (name === "cityName") {
-    newValue = value.charAt(0).toUpperCase() + value.slice(1);
-  }
-
-  setForm({ ...form, [name]: newValue });
-};
-
-  // Validation rules
- // Regex patterns 
-const cityNamePattern = /^[A-Za-z\s-]+$/;
-const countryNamePattern = /^[A-Za-z\s]+$/;
-
-const validate = () => {
-  const newErrors = {};
-
-  // --- City Name validation ---
-  if (!cityNamePattern.test(form.cityName)) {
-    newErrors.cityName = "City name should contain only letters, spaces, or hyphens.";
-  }
-
-  // --- Country ---
-  if (!countryNamePattern.test(form.country)) {
-    newErrors.country = "Country should contain only letters and spaces.";
-  }
-
-  // --- Description ---
-  if (form.description.trim().length < 40) {
-    newErrors.description = "Description must be at least 40 characters long.";
-  }
-
-  // --- Image ---
-  if (!editingData && !form.image) {
-    newErrors.image = "Please upload an image.";
-  } else if (form.image) {
-    const validTypes = ["image/jpeg", "image/png", "image/webp"];
-    const maxSize = 2 * 1024 * 1024; // 2MB
-
-    if (!validTypes.includes(form.image.type)) {
-      newErrors.image = "Only JPG, PNG, or WEBP formats are allowed.";
-    } else if (form.image.size > maxSize) {
-      newErrors.image = "Image must be smaller than 2MB.";
+    // Capitalize first letter for cityName and country
+    if (name === "cityName" || name === "country") {
+      newValue = value.charAt(0).toUpperCase() + value.slice(1);
     }
-  }
 
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
+    setForm({ ...form, [name]: newValue });
+  };
 
-// When the user clicks the submit button:
+  // Regex patterns
+  const cityNamePattern = /^[\p{L}\s-]+$/u;
+  const countryNamePattern = /^[\p{L}\s]+$/u;
+
+  const validate = () => {
+    const newErrors = {};
+
+    // --- City Name validation ---
+    if (!cityNamePattern.test(form.cityName)) {
+      newErrors.cityName =
+        "City name should contain only letters, spaces, or hyphens.";
+    }
+
+    // --- Country ---
+    if (!countryNamePattern.test(form.country)) {
+      newErrors.country = "Country should contain only letters and spaces.";
+    }
+
+    // --- Description ---
+    if (form.description.trim().length < 40) {
+      newErrors.description =
+        "Description must be at least 40 characters long.";
+    }
+
+    // --- Image ---
+    if (!form.image) {
+      newErrors.image = "Please upload an image.";
+    } else if (form.image) {
+      const validTypes = ["image/jpeg", "image/png", "image/webp"];
+      const maxSize = 2 * 1024 * 1024; // 2MB
+
+      if (!validTypes.includes(form.image.type)) {
+        newErrors.image = "Only JPG, PNG, or WEBP formats are allowed.";
+      } else if (form.image.size > maxSize) {
+        newErrors.image = "Image must be smaller than 2MB.";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // When the user clicks the submit button:
   const handleSubmit = (e) => {
     e.preventDefault(); // Don’t reload the page.
-    if (validate()) { // Check all the inputs (with validate()).
+    if (validate()) {
+      // Check all the inputs (with validate()).
       onAddCity(form); // If everything looks good, send the form data to the parent component (with onAddCity(form)).
     }
   };
 
   return (
     <div className="flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md bg-gray-200 p-7 pt-0 rounded-lg shadow-md mt-8">
+      <div className="w-full max-w-md max-w-xl bg-gray-200 p-7 pt-0 rounded-lg shadow-md mt-8">
         <h2 className="text-2xl font-semibold text-center m-4">
-          {editingData ? "Edit City" : "Add a New City"}
+          Add a New City
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* City Name */}
           <div>
-            <label className="block font-medium text-gray-700 mb-1">City Name *</label>
+            <label className="block font-medium text-gray-700 mb-1">
+              City Name *
+            </label>
             <input
               type="text"
               name="cityName"
@@ -114,34 +112,42 @@ const validate = () => {
               className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
               required
             />
-            {errors.cityName && <p className="text-red-600 text-sm mt-1">{errors.cityName}</p>}
+            {errors.cityName && (
+              <p className="text-red-600 text-sm mt-1">{errors.cityName}</p>
+            )}
           </div>
 
           {/* Country */}
           <div>
-            <label className="block font-medium text-gray-700 mb-1">Country *</label>
+            <label className="block font-medium text-gray-700 mb-1">
+              Country *
+            </label>
             <input
               type="text"
               name="country"
               value={form.country}
               onChange={handleChange}
-              placeholder="Enter country"
+              placeholder="Enter the full country name, e.g. (United Arab Emirates)"
               className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
               required
             />
-            {errors.country && <p className="text-red-600 text-sm mt-1">{errors.country}</p>}
+            {errors.country && (
+              <p className="text-red-600 text-sm mt-1">{errors.country}</p>
+            )}
           </div>
 
           {/* Description */}
           <div>
-            <label className="block font-medium text-gray-700 mb-1">Description *</label>
+            <label className="block font-medium text-gray-700 mb-1">
+              Description *
+            </label>
             <textarea
               name="description"
               value={form.description}
               onChange={handleChange}
               placeholder="Enter description (min 40 characters)"
-              rows="4"
-              className="w-full border rounded-lg px-4 py-2 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-black"
+              rows="8"
+              className="w-full border rounded-lg px-4 py-2 min-h-[300px] focus:outline-none focus:ring-2 focus:ring-black"
               required
             ></textarea>
             {errors.description && (
@@ -151,16 +157,20 @@ const validate = () => {
 
           {/* Image Upload */}
           <div>
-            <label className="block font-medium text-gray-700 mb-1">Upload Image *</label>
+            <label className="block font-medium text-gray-700 mb-1">
+              Upload Image *
+            </label>
             <input
               type="file"
               name="image"
               accept="image/*"
               onChange={handleImageChange}
-              required={!editingData}
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              required
             />
-            {errors.image && <p className="text-red-600 text-sm mt-1">{errors.image}</p>}
+            {errors.image && (
+              <p className="text-red-600 text-sm mt-1">{errors.image}</p>
+            )}
           </div>
 
           {/* Buttons */}
@@ -169,7 +179,7 @@ const validate = () => {
               type="submit"
               className="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-md text-sm font-medium"
             >
-              {editingData ? "Save Changes" : "Add City"}
+              Add City
             </button>
 
             <button

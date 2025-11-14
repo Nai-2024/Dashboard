@@ -4,11 +4,19 @@
 // Calls createPlace() from apiService.
 import { createPlace } from "./api/placesService";
 
-// Create new place
-export async function handleCreatePlace(placeData) {
+// Create new place and update UI
+export async function handleCreatePlace(placeData, { setLocalPlaces }) {
   try {
+    console.log("Creating place with:", placeData);
+
+    // Send data to backend
     const newPlace = await createPlace(placeData);
+
     console.log("Place created successfully:", newPlace);
+
+    // Update frontend UI
+    setLocalPlaces((prev) => [newPlace, ...prev]);
+
     return newPlace;
   } catch (err) {
     console.error("Failed to create place:", err);

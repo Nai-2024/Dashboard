@@ -1,31 +1,53 @@
 import React, { useState, useEffect } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import AddNotificationForm from "./AddNotificationFrom";
+import {
+  fetchNotifications,
+  createNotification,
+  deleteNotification,
+} from "../../services/api/notificationsService";
 
 export default function NotificationsList() {
-  const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem("notificationsData");
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  const [notifications, setNotifications] = useState([]);
   const [showForm, setShowForm] = useState(false);
 
-  // Save notifications to localStorage
+  // Load from backend
   useEffect(() => {
-    localStorage.setItem("notificationsData", JSON.stringify(notifications));
-  }, [notifications]);
+    async function loadData() {
+      try {
+        const data = await fetchNotifications();
+        setNotifications(data);
+      } catch (err) {
+        console.error("Failed to load notifications", err);
+      }
+    }
+    loadData();
+  }, []);
 
-  // Handle delete
-  const handleDeleteNotification = (index) => {
-    const updated = notifications.filter((_, i) => i !== index);
-    setNotifications(updated);
-  };
+  // FIXED: Delete handler
+  async function handleDeleteNotification(id) {
+    try {
+      await deleteNotification(id);
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
+    } catch (err) {
+      console.error("Failed to delete notification", err);
+    }
+  }
 
-  // Handle add
-  const handleAddNotification = (newNotification) => {
-    setNotifications((prev) => [...prev, newNotification]);
-    setShowForm(false);
-  };
+  // FIXED: Add handler
+  async function handleAddNotification(newNotification) {
+    try {
+      const res = await createNotification({
+        title: newNotification.title,
+        description: newNotification.description,
+      });
+
+      setNotifications((prev) => [...prev, res.title]); // backend returns `{title: object}`
+      setShowForm(false);
+    } catch (err) {
+      console.error("Failed to add notification", err);
+    }
+  }
 
   return (
     <div>
@@ -51,7 +73,6 @@ export default function NotificationsList() {
                 <tr>
                   <th className="px-4 py-3 text-left">Title</th>
                   <th className="px-4 py-3 text-left">Description</th>
-                  <th className="px-4 py-3 text-left">Category</th>
                   <th className="pl-7 py-3 text-left w-32">Action</th>
                 </tr>
               </thead>
@@ -60,37 +81,29 @@ export default function NotificationsList() {
                 {notifications.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="5"
+                      colSpan="3"
                       className="px-4 py-6 text-center text-gray-500 italic"
                     >
                       No notifications available
                     </td>
                   </tr>
                 ) : (
-                  notifications.map((note, idx) => (
+                  notifications.map((note) => (
                     <tr
-                      key={idx}
+                      key={note._id}
                       className="border-b last:border-b-0 hover:bg-gray-50 transition-all duration-300"
                     >
-                      {/* Title */}
                       <td className="px-4 py-3 font-semibold text-gray-800">
                         {note.title}
                       </td>
 
-                      {/* Description */}
                       <td className="px-4 py-3 text-gray-700">
                         {note.description}
                       </td>
 
-                      {/* Category */}
-                      <td className="px-4 py-3 text-gray-600">
-                        {note.category}
-                      </td>
-
-                      {/* Action */}
                       <td className="pl-7 py-3 text-left">
                         <button
-                          onClick={() => handleDeleteNotification(idx)}
+                          onClick={() => handleDeleteNotification(note._id)}
                           className="bg-red-500 text-white px-3 py-1.5 rounded-full text-sm font-medium inline-flex items-center gap-1 hover:bg-red-600 transition"
                         >
                           <FiTrash2 /> Delete

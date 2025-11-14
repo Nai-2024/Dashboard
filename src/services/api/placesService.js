@@ -1,4 +1,3 @@
-
 import { BASE_URL } from "../../config";
 import { logActivity } from "../activityService";
 
@@ -6,7 +5,19 @@ import { logActivity } from "../activityService";
 export async function fetchPlaces() {
   const res = await fetch(`${BASE_URL}/api/places`);
   if (!res.ok) throw new Error("Failed to fetch places");
-  return await res.json();
+  const data = await res.json();
+
+  // Log full backend response
+  console.log("Places Fetched Data:", data);
+
+  // If you want to inspect individual fields:
+  if (Array.isArray(data) && data.length > 0) {
+    console.log("Example place object keys:", Object.keys(data[0]));
+  } else {
+    console.log("No places returned from backend.");
+  }
+
+  return data;
 }
 
 // This function just talks to the server. Sends an HTTP POST request to /api/places.
@@ -29,6 +40,7 @@ export async function createPlace(placeData) {
   formData.append("reviewLink", placeData.reviewLink || "");
 
   // Handle both single and multiple features
+  /* 
   if (typeof placeData.features === "string") {
     const featuresArray = placeData.features
       .split(",")
@@ -38,12 +50,43 @@ export async function createPlace(placeData) {
   } else {
     formData.append("features", JSON.stringify(placeData.features || []));
   }
+*/
+  // Handle features
+  const cleanedFeatures =
+    typeof placeData.features === "string"
+      ? placeData.features
+          .split(",")
+          .map((f) => f.trim())
+          .filter((f) => f)
+      : placeData.features || [];
+
+  formData.append("features", JSON.stringify(cleanedFeatures));
 
   // profile image
   if (placeData.profileImage instanceof File) {
     formData.append("profile", placeData.profileImage);
   }
+  // Handle multiple pictures
+  if (placeData.pictures) {
+    if (
+      placeData.pictures instanceof FileList ||
+      Array.isArray(placeData.pictures)
+    ) {
+      for (let i = 0; i < placeData.pictures.length; i++) {
+        formData.append("pictures", placeData.pictures[i]);
+      }
+    } else if (placeData.pictures instanceof File) {
+      formData.append("pictures", placeData.pictures);
+    }
+  }
 
+  // For debugging purposes
+  console.log("FormData being sent:");
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+
+  // Send data to backend
   const res = await fetch(`${BASE_URL}/api/places`, {
     method: "POST",
     body: formData,
@@ -73,6 +116,7 @@ export async function updatePlace(id, placeData) {
   formData.append("country", placeData.country);
   formData.append("postalCode", placeData.postalCode);
   formData.append("address", placeData.address);
+  //formData.append("features", placeData.features);
   formData.append("certification", placeData.certification);
   formData.append("description", placeData.description);
   formData.append("phoneNumber", placeData.phoneNumber);
@@ -90,11 +134,27 @@ export async function updatePlace(id, placeData) {
   } else {
     formData.append("features", JSON.stringify(placeData.features || []));
   }
+
   //image update
   if (placeData.profileImage instanceof File) {
     formData.append("profile", placeData.profileImage);
   }
 
+  // Pictures (optional)
+  if (placeData.pictures) {
+    if (
+      placeData.pictures instanceof FileList ||
+      Array.isArray(placeData.pictures)
+    ) {
+      for (let i = 0; i < placeData.pictures.length; i++) {
+        formData.append("pictures", placeData.pictures[i]);
+      }
+    } else if (placeData.pictures instanceof File) {
+      formData.append("pictures", placeData.pictures);
+    }
+  }
+
+  // Push data to the backend
   const res = await fetch(`${BASE_URL}/api/places/${id}`, {
     method: "PUT",
     body: formData,

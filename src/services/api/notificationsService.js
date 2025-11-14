@@ -3,14 +3,14 @@ import { BASE_URL } from "../../config";
 
 // Fetch all notifications
 export async function fetchNotifications() {
-  const res = await fetch(`${BASE_URL}/notifications`);
+  const res = await fetch(`${BASE_URL}/api/titles`);
   if (!res.ok) throw new Error("Failed to fetch notifications");
   return res.json();
 }
 
 // Add new notification
 export async function createNotification(data) {
-  const res = await fetch(`${BASE_URL}/notifications`, {
+  const res = await fetch(`${BASE_URL}/api/titles`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -21,7 +21,7 @@ export async function createNotification(data) {
 
 // Delete a notification
 export async function deleteNotification(id) {
-  const res = await fetch(`${BASE_URL}/notifications/${id}`, {
+  const res = await fetch(`${BASE_URL}/api/titles/${id}`, {
     method: "DELETE",
   });
   if (!res.ok) throw new Error("Failed to delete notification");

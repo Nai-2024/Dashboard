@@ -41,6 +41,7 @@ export default function LoginGate({ children }) {
       // Otherwise, display an invalid login message.
       if (res.ok) {
         localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("username", username); // Store name of the loged in person
         setAuthorized(true);
       } else {
         setError("Invalid username or password.");

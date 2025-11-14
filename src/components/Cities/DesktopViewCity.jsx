@@ -1,7 +1,7 @@
 import React from "react";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
 
-export default function DesktopView({ cities, onEdit, onDelete }) {
+export default function DesktopView({ cities, onDelete }) {
   return (
     <div className="w-full bg-transparent px-4 md:px-6 lg:px-0">
       <div className="bg-white rounded-lg shadow-md overflow-x-auto">
@@ -41,7 +41,7 @@ export default function DesktopView({ cities, onEdit, onDelete }) {
                     )}
                   </td>
 
-                  {/* City Name (div moved inside td) */}
+                  {/* City Name */}
                   <td className="px-4 py-3 font-semibold text-gray-800 align-top">
                     <div className="flex-1">{city.cityName}</div>
                   </td>
@@ -52,14 +52,8 @@ export default function DesktopView({ cities, onEdit, onDelete }) {
                   </td>
 
                   {/* Actions */}
-                  <td className="px-4 py-3 align-top pr-6">
+                  <td className="px-4 py-3 text-center pr-6">
                     <div className="flex flex-wrap gap-2 justify-start">
-                      <button
-                        onClick={() => onEdit(city, idx)}
-                        className="bg-sky-500 text-white w-[90px] px-3 py-1.5 rounded-[10px] text-sm font-medium flex items-center justify-center gap-1 hover:bg-sky-600 transition"
-                      >
-                        <FiEdit /> Edit
-                      </button>
                       <button
                         onClick={() => onDelete(idx)}
                         className="bg-red-500 text-white w-[90px] px-3 py-1.5 rounded-[10px] text-sm font-medium flex items-center justify-center gap-1 hover:bg-red-600 transition"
