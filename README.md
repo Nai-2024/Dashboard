@@ -1,16 +1,79 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## **Travel Admin Dashboard**
 
-Currently, two official plugins are available:
+A React-based administration dashboard for managing travel data including cities, places, notifications, and visualizing world locations using a map.
+This dashboard is designed for internal admin use and provides a clean UI, CRUD operations, and real-time activity tracking.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Features**
 
-## React Compiler
+* Admin Authentication
+* Basic Auth (username & password)
+* Local validation + backend verification
+* Session stored via localStorage
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Dashboard Overview**
+* Total Cities
+* Total Places
+* Total Categories
+* Total Users
+* Recent Activity Log
+* World Map Visualization (Leaflet)
 
-## Expanding the ESLint configuration
+**Cities Management**
+* Add City
+* Delete City
+* Upload City Images
+* Desktop, Tablet, and Mobile UI views
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Places Management**
+* Add Place
+* Update Place
+* Delete Place
+* Upload profile & gallery images (S3)
+* View details in modal
+
+**Notifications Management**
+* Create notifications
+* Delete notifications
+* Stored using backend /api/titles
+* Clean UI with table listing
+
+**World Map Integration**
+* Interactive Leaflet map
+* Lock zoom.
+* Shows cities on the global map
+
+**Fully Responsive**
+* Built with TailwindCSS to support:
+* Desktop
+* Tablet
+* Mobile
+
+**Project Structure**
+src/
+ ├── components/
+ │   ├── Dashboard/
+ │   │   ├── Dashboard.jsx
+ │   │   └── DashboardOverview.jsx
+ │   ├── Cities/
+ │   │   ├── CitiesList.jsx
+ │   │   └── AddCityForm.jsx
+ │   ├── Places/
+ │   │   ├── PlacesList.jsx
+ │   │   └── AddPlaceForm.jsx
+ │   ├── Notifications/
+ │   │   ├── NotificationsList.jsx
+ │   │   └── AddNotificationForm.jsx
+ │   └── map/
+ │       └── WorldMapLeaflet.jsx
+ │
+ ├── services/
+ │   └── api/
+ │       ├── citiesService.js
+ │       ├── placesService.js
+ │       ├── notificationsService.js
+ │       └── userService.js
+ │
+ ├── config.js
+ └── App.js
+
