@@ -164,7 +164,7 @@ export default function Dashboard() {
                 {user?.name || "Admin User"}
               </h2>
               <p className="text-sm text-gray-500">
-                {user?.role} · Last updated {user?.lastUpdated}
+                {user?.role} 
               </p>
             </div>
           </div>

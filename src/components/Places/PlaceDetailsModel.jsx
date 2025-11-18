@@ -9,10 +9,9 @@ export default function PlaceDetailsModel({
   if (!place) return null;
   console.log("Place Details Model: Place data in modal:", place);
 
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-      <div className="bg-white rounded-2xl w-[90%] md:w-[900px] max-h-[90vh] overflow-y-auto shadow-xl">
+      <div className="bg-white rounded-md w-[90%] md:w-[900px] max-h-[90vh] overflow-y-auto shadow-xl">
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4">
           <div className="flex items-center gap-2">
@@ -181,8 +180,10 @@ export default function PlaceDetailsModel({
           </button>
 
           <button
-            onClick={() =>  {onClose(); //clost model
-              onEdit(place)}} // then open edit form
+            onClick={() => {
+              onClose(); //clost model
+              onEdit(place);
+            }} // then open edit form
             className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg font-medium"
           >
             Edit
