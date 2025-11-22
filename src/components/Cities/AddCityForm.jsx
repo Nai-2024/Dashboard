@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { fetchAllCountries } from "../../services/api/countriesListService";
 
 export default function AddCityForm({ onAddCity, onCancel }) {
   // This stores the user’s input (form data).
@@ -14,6 +15,24 @@ export default function AddCityForm({ onAddCity, onCancel }) {
   // This keeps track of error messages when the user types something wrong.
   // Example: if city name is invalid → errors.cityName = "Invalid name".
   const [errors, setErrors] = useState({});
+
+  const [countries, setCountries] = useState([]);
+  const [cities, setCities] = useState([]);
+  useEffect(() => {
+    async function loadCountries() {
+      const result = await fetchAllCountries();
+      setCountries(result);
+    }
+    loadCountries();
+  }, []);
+
+  // Load cities when the country changes
+  useEffect(() => {
+    if (form.country) {
+      const selected = countries.find((c) => c.country === form.country);
+      setCities(selected ? selected.cities : []);
+    }
+  }, [form.country, countries]);
 
   // Image handler - This function takes the image file that the user picks and saves it into your form state (form.image),
   // so it can later be sent to your backend or Firestore when the user clicks Add City.
@@ -98,48 +117,65 @@ export default function AddCityForm({ onAddCity, onCancel }) {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* City Name */}
-          <div>
-            <label className="block font-medium text-gray-700 mb-1">
-              City Name *
-            </label>
-            <input
-              type="text"
-              name="cityName"
-              value={form.cityName}
-              onChange={handleChange}
-              placeholder="Enter city name"
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-              required
-            />
-            {errors.cityName && (
-              <p className="text-red-600 text-sm mt-1">{errors.cityName}</p>
-            )}
-          </div>
-
           {/* Country */}
           <div>
-            <label className="block font-medium text-gray-700 mb-1">
-              Country *
+            <label className="block font-medium text-gray-700 mb-1 label-required">
+              Country
             </label>
-            <input
-              type="text"
+
+            <select
               name="country"
               value={form.country}
               onChange={handleChange}
-              placeholder="Enter the full country name, e.g. (United Arab Emirates)"
               className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
               required
-            />
+            >
+              <option value="">Select Country</option>
+              {countries.map((c) => (
+                <option key={c.country} value={c.country}>
+                  {c.country}
+                </option>
+              ))}
+            </select>
+
             {errors.country && (
               <p className="text-red-600 text-sm mt-1">{errors.country}</p>
             )}
           </div>
 
+          {/* City Name */}
+          <div>
+            <label className="block font-medium text-gray-700 mb-1 label-required">
+              City Name
+            </label>
+
+            <select
+              name="cityName"
+              value={form.cityName}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+              required
+              disabled={!form.country} // disable until a country is selected
+            >
+              <option value="">Select City</option>
+
+              {/* Only show cities for the selected country */}
+              {cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+
+            {errors.cityName && (
+              <p className="text-red-600 text-sm mt-1">{errors.cityName}</p>
+            )}
+          </div>
+
           {/* Description */}
           <div>
-            <label className="block font-medium text-gray-700 mb-1">
-              Description *
+            <label className="block font-medium text-gray-700 mb-1 label-required">
+              Description
             </label>
             <textarea
               name="description"
@@ -157,8 +193,8 @@ export default function AddCityForm({ onAddCity, onCancel }) {
 
           {/* Image Upload */}
           <div>
-            <label className="block font-medium text-gray-700 mb-1">
-              Upload Image *
+            <label className="block font-medium text-gray-700 mb-1 label-required">
+              Upload Image
             </label>
             <input
               type="file"

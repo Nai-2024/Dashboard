@@ -8,6 +8,7 @@ import CitiesList from "../Cities/CitiesList";
 import AddCityForm from "../Cities/AddCityForm";
 import NotificationsList from "../Notifications/NotificationsList";
 import DashboardOverview from "./DashboardOverview";
+import Logo from "../../assets/Destigations-logo.png";
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -68,16 +69,28 @@ export default function Dashboard() {
         }`}
       >
         <div className="flex flex-col flex-grow">
-          <h1 className="p-6 text-lg font-bold text-gray-900 border-b">
-            Travel App Admin
-          </h1>
-          <nav className="flex flex-col flex-grow">
+          {/* Header with logo on left */}
+          <div className="flex flex-col">
+            <div className="w-full flex px-6 bg-white py-3 my-3 border-b shadow-sm">
+              <img
+                src={Logo}
+                alt="Logo"
+                className="object-contain  w-[180px]"
+              />
+            </div>
+
+            <h1 className="text-lg px-6 my-2 font-semibold text-gray-900 ">
+              Travel App Admin
+            </h1>
+          </div>
+
+          <nav className="flex flex-col flex-grow font-medium">
             <button
               onClick={() => {
                 setActiveSection("dashboard");
                 setIsSidebarOpen(false);
               }}
-              className={`flex items-center gap-2 px-6 py-3 text-gray-700 hover:text-sky-600 ${
+              className={`flex items-center px-6 gap-2 py-3 text-gray-700 hover:text-sky-600 ${
                 activeSection === "dashboard" ? "bg-sky-100 text-sky-600" : ""
               }`}
             >
@@ -89,7 +102,7 @@ export default function Dashboard() {
                 setActiveSection("places");
                 setIsSidebarOpen(false);
               }}
-              className={`flex items-center gap-2 px-6 py-3 text-gray-700 hover:text-sky-600 ${
+              className={`flex items-center px-6 gap-2 py-3 text-gray-700 hover:text-sky-600 ${
                 activeSection === "places" ? "bg-sky-100 text-sky-600" : ""
               }`}
             >
@@ -102,7 +115,7 @@ export default function Dashboard() {
                 setShowCityForm(false);
                 setIsSidebarOpen(false);
               }}
-              className={`flex items-center gap-2 px-6 py-3 text-gray-700 hover:text-sky-600 ${
+              className={`flex items-center px-6 gap-2 py-3 text-gray-700 hover:text-sky-600 ${
                 activeSection === "cities" ? "bg-sky-100 text-sky-600" : ""
               }`}
             >
@@ -114,7 +127,7 @@ export default function Dashboard() {
                 setActiveSection("notifications");
                 setIsSidebarOpen(false);
               }}
-              className={`flex items-center gap-2 px-6 py-3 text-gray-700 hover:text-sky-600 ${
+              className={`flex items-center px-6 gap-2 py-3 text-gray-700 hover:text-sky-600 ${
                 activeSection === "notifications"
                   ? "bg-sky-100 text-sky-600"
                   : ""
@@ -129,7 +142,7 @@ export default function Dashboard() {
                 localStorage.removeItem("isLoggedIn");
                 window.location.reload();
               }}
-              className="flex items-center gap-2 px-6 py-3 mt-6 text-gray-700 hover:text-red-600 font-medium border-t border-gray-100 pt-4"
+              className="flex items-center px-6 gap-2 mt-2 text-gray-700 hover:text-red-600 font-medium border-t-2 border-gray-100 pt-4"
             >
               <FiLogOut /> Logout
             </button>
@@ -163,15 +176,13 @@ export default function Dashboard() {
               <h2 className="text-lg font-semibold text-gray-900">
                 {user?.name || "Admin User"}
               </h2>
-              <p className="text-sm text-gray-500">
-                {user?.role} 
-              </p>
+              <p className="text-sm text-gray-500">{user?.role}</p>
             </div>
           </div>
         </div>
 
         {/* Conditional Content */}
-        <div className="flex-1 overflow-y-auto pr-1">
+        <div className="flex-1 overflow-visible pr-1">
           {activeSection === "places" && (
             <PlacesList places={places} onAdd={handleAddPlace} />
           )}

@@ -5,31 +5,42 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
     image: "",
     title: "",
     description: "",
-    category: "",
   });
 
-  const categories = ["Place", "Hotel", "Restaurant"];
+  const [errors, setErrors] = useState({});
 
+  // Single handler for all fields
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
     if (files && files[0]) {
       const reader = new FileReader();
       reader.onload = () => {
         setForm((prev) => ({ ...prev, image: reader.result }));
       };
       reader.readAsDataURL(files[0]);
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+      return;
     }
+
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!form.title.trim()) newErrors.title = "Title is required.";
+    if (!form.description.trim()) newErrors.description = "Description is required.";
+    if (!form.image) newErrors.image = "Please upload an image.";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!form.title || !form.description || !form.category) {
-      alert("Please fill all required fields.");
-      return;
-    }
+    if (!validate()) return;
 
     const newNotification = {
       ...form,
@@ -37,7 +48,9 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
     };
 
     onAddNotification(newNotification);
-    setForm({ image: "", title: "", description: "", category: "" });
+
+    setForm({ image: "", title: "", description: "" });
+    setErrors({});
   };
 
   return (
@@ -48,6 +61,7 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+
           {/* Title */}
           <div>
             <label className="block font-medium text-gray-700 mb-1">
@@ -58,32 +72,11 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
               name="title"
               value={form.title}
               onChange={handleChange}
-              placeholder="Enter notification title"
-              required
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-black"
             />
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="block font-medium text-gray-700 mb-2">
-              Category <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-              required
-              className="w-full p-2.5 border border-gray-300 rounded-md text-sm bg-white 
-                         focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
-            >
-              <option value="">Select category</option>
-              {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+            {errors.title && (
+              <p className="text-red-600 text-sm mt-1">{errors.title}</p>
+            )}
           </div>
 
           {/* Description */}
@@ -95,12 +88,30 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
               name="description"
               value={form.description}
               onChange={handleChange}
-              rows="3"
-              placeholder="Enter notification description"
-              required
-              className="w-full border rounded-lg px-4 py-2 min-h-[200px] focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border rounded-lg px-4 py-2 min-h-[200px] focus:ring-2 focus:ring-black"
             ></textarea>
+            {errors.description && (
+              <p className="text-red-600 text-sm mt-1">{errors.description}</p>
+            )}
           </div>
+
+          {/* Image */}
+          <div>
+            <label className="block font-medium text-gray-700 mb-1">
+              Upload Image <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={handleChange}
+              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+            />
+            {errors.image && (
+              <p className="text-red-600 text-sm mt-1">{errors.image}</p>
+            )}
+          </div>
+
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <button

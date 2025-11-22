@@ -4,6 +4,7 @@ import { createCity, deleteCity } from "../../services/api/citiesService";
 import DesktopView from "./DesktopViewCity";
 import TabletView from "./TabletViewCity";
 import MobileView from "./MobileViewCity";
+import {citiesSearchAndSort} from "../../services/searchSort";
 
 export default function CitiesList({ cities }) {
   const [localCities, setLocalCities] = useState([]);
@@ -16,6 +17,15 @@ export default function CitiesList({ cities }) {
       setLocalCities(cities);
     }
   }, [cities]);
+  // Search bar and sorting
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOption, setSortOption] = useState("");
+
+  const filteredCities = citiesSearchAndSort(
+    localCities,
+    searchQuery,
+    sortOption
+  );
 
   // Handle window resize for responsive rendering
   useEffect(() => {
@@ -24,7 +34,7 @@ export default function CitiesList({ cities }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Add city 
+  // Add city
   const handleAddCity = async (city) => {
     try {
       const newCity = await createCity(city);
@@ -55,12 +65,39 @@ export default function CitiesList({ cities }) {
   // Choose layout based on screen width
   const renderResponsiveView = () => {
     if (screenWidth >= 1024)
-      return <DesktopView cities={localCities} onDelete={handleDeleteCity} />;
+      return (
+        <DesktopView
+          cities={filteredCities}
+          onDelete={handleDeleteCity}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+        />
+      );
 
     if (screenWidth >= 640)
-      return <TabletView cities={localCities} onDelete={handleDeleteCity} />;
+      return (
+        <TabletView
+          cities={filteredCities}
+          onDelete={handleDeleteCity}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+        />
+      );
 
-    return <MobileView cities={localCities} onDelete={handleDeleteCity} />;
+    return (
+      <MobileView
+        cities={filteredCities}
+        onDelete={handleDeleteCity}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        sortOption={sortOption}
+        setSortOption={setSortOption}
+      />
+    );
   };
 
   return (

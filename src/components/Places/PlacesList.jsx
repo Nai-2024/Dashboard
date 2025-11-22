@@ -6,14 +6,24 @@ import MobileView from "./MobileView";
 import { deletePlace, updatePlace } from "../../services/api/placesService";
 import { handleCreatePlace } from "../../services/dataHandlers";
 import PlaceDetailsModel from "./PlaceDetailsModel";
-
+import {placesSearchAndSort} from "../../services/searchSort";
+placesSearchAndSort
 export default function PlacesList({ places }) {
   const [localPlaces, setLocalPlaces] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingData, setEditingData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [width, setWidth] = useState(window.innerWidth);
+  const [screenWidth, setWidth] = useState(window.innerWidth);
   const [selectedPlace, setSelectedPlace] = useState(null);
+  // Search bar and sorting
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOption, setSortOption] = useState("");
+
+  const filteredPlaces = placesSearchAndSort(
+    localPlaces,
+    searchQuery,
+    sortOption
+  );
 
   // Track screen size
   useEffect(() => {
@@ -93,22 +103,44 @@ export default function PlacesList({ places }) {
   };
 
   const renderLayout = () => {
-    if (width >= 1024) {
+    if (screenWidth >= 1024) {
       return (
         <DesktopView
-          places={localPlaces}
+          places={filteredPlaces}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
           onEdit={handleEditPlace}
           onDelete={handleDeletePlace}
           setSelectedPlace={setSelectedPlace}
         />
       );
-    } else if (width >= 640 && width < 1024) {
+    } else if (screenWidth >= 640 && screenWidth < 1024) {
       return (
-        <TabletView places={localPlaces} setSelectedPlace={setSelectedPlace} />
+        <TabletView
+          places={filteredPlaces}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+          onEdit={handleEditPlace}
+          onDelete={handleDeletePlace}
+          setSelectedPlace={setSelectedPlace}
+        />
       );
     } else {
       return (
-        <MobileView places={localPlaces} setSelectedPlace={setSelectedPlace} />
+        <MobileView
+          places={filteredPlaces}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+          onEdit={handleEditPlace}
+          onDelete={handleDeletePlace}
+          setSelectedPlace={setSelectedPlace}
+        />
       );
     }
   };

@@ -5,7 +5,7 @@ import App from "./App.jsx";
 import "./index.css"; // Tailwind
 import "leaflet/dist/leaflet.css";
 import "./services/leafletIconFix.js";
-
+import './App.css';
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
