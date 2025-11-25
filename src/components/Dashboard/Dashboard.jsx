@@ -8,7 +8,7 @@ import CitiesList from "../Cities/CitiesList";
 import AddCityForm from "../Cities/AddCityForm";
 import NotificationsList from "../Notifications/NotificationsList";
 import DashboardOverview from "./DashboardOverview";
-import Logo from "../../assets/Destigations-logo.png";
+import Logo from "../../assets/DestigationsLogo.png";
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
