@@ -11,6 +11,7 @@ import TabletViewNotifications from "./TabletViewNotifications";
 import MobileViewNotifications from "./MobileViewNotifications";
 
 export default function NotificationsList() {
+  console.log("🔥 VERSION 10 — Notification UI Loaded");
   const [notifications, setNotifications] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
