@@ -6,7 +6,7 @@ import {
   createNotification,
   deleteNotification,
 } from "../../services/api/notificationsService";
-import DesktopViewNotifications from "./DesktopViewNotifications";
+import DesktopViewNotificationsNew from "./DesktopViewNotificationsNew";
 import TabletViewNotifications from "./TabletViewNotifications";
 import MobileViewNotifications from "./MobileViewNotifications";
 
@@ -63,7 +63,7 @@ export default function NotificationsList() {
   const renderResponsiveView = () => {
     if (screenWidth >= 1024) {
       return (
-        <DesktopViewNotifications
+        <DesktopViewNotificationsNew
           notifications={notifications}
           onDelete={handleDeleteNotification}
         />

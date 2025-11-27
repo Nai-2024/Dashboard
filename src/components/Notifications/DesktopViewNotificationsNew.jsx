@@ -1,7 +1,7 @@
 import React from "react";
 import { FiTrash2 } from "react-icons/fi";
 
-export default function DesktopViewNotifications({ notifications, onDelete }) {
+export default function DesktopViewNotificationsNew({ notifications, onDelete }) {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-x-auto">
       <table className="w-full border-collapse text-sm table-auto">
