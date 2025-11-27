@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 export default function AddNotificationForm({ onAddNotification, onCancel }) {
   const [form, setForm] = useState({
-    image: "",
+    profile: "",
     title: "",
     description: "",
   });
@@ -14,11 +14,7 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
     const { name, value, files } = e.target;
 
     if (files && files[0]) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setForm((prev) => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(files[0]);
+      setForm((prev) => ({ ...prev, profile: files[0] })); // Save File object
       return;
     }
 
@@ -29,8 +25,9 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
     const newErrors = {};
 
     if (!form.title.trim()) newErrors.title = "Title is required.";
-    if (!form.description.trim()) newErrors.description = "Description is required.";
-    if (!form.image) newErrors.image = "Please upload an image.";
+    if (!form.description.trim())
+      newErrors.description = "Description is required.";
+    if (!form.profile) newErrors.profile = "Please upload an image.";
 
     setErrors(newErrors);
 
@@ -43,13 +40,14 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
     if (!validate()) return;
 
     const newNotification = {
-      ...form,
-      time: new Date().toLocaleString(),
+      title: form.title,
+      description: form.description,
+      profile: form.profile,
     };
 
     onAddNotification(newNotification);
 
-    setForm({ image: "", title: "", description: "" });
+    setForm({ profile: "", title: "", description: "" });
     setErrors({});
   };
 
@@ -61,7 +59,6 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* Title */}
           <div>
             <label className="block font-medium text-gray-700 mb-1">
@@ -102,13 +99,13 @@ export default function AddNotificationForm({ onAddNotification, onCancel }) {
             </label>
             <input
               type="file"
-              name="image"
+              name="profile"
               accept="image/*"
               onChange={handleChange}
               className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
             />
-            {errors.image && (
-              <p className="text-red-600 text-sm mt-1">{errors.image}</p>
+            {errors.profile && (
+              <p className="text-red-600 text-sm mt-1">{errors.profile}</p>
             )}
           </div>
 

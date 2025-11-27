@@ -1,0 +1,163 @@
+
+
+import React, { useState, useEffect } from "react";
+import { FiTrash2 } from "react-icons/fi";
+import AddNotificationForm from "./AddNotificationFrom";
+import {
+  fetchNotifications,
+  createNotification,
+  deleteNotification,
+} from "../../services/api/notificationsService";
+
+export default function NotificationsList() {
+  const [notifications, setNotifications] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+
+  // Load from backend
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await fetchNotifications();
+        setNotifications(data);
+      } catch (err) {
+        console.error("Failed to load notifications", err);
+      }
+    }
+    loadData();
+  }, []);
+
+  // FIXED: Delete handler
+  async function handleDeleteNotification(id) {
+    try {
+      await deleteNotification(id);
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
+      
+    } catch (err) {
+      console.error("Failed to delete notification", err);
+    }
+  }
+
+  // FIXED: Add handler
+  async function handleAddNotification(newNotification) {
+    try {
+      const res = await createNotification(newNotification);
+
+      setNotifications((prev) => [...prev, res.title || res]);
+      setShowForm(false);
+    } catch (err) {
+      console.error("Failed to add notification", err);
+    }
+  }
+
+  return (
+    <div className="w-full">
+      {!showForm ? (
+        <>
+          {/* Header */}
+          <section className="flex items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+            <button
+              className="ml-auto bg-sky-600 hover:bg-sky-700 text-white px-6 py-2.5 rounded-full text-sm font-medium"
+              onClick={() => setShowForm(true)}
+            >
+              Add Notification
+            </button>
+          </section>
+
+          {/* --- MOBILE CARD VIEW (md:hidden) --- */}
+          <div className="md:hidden space-y-4">
+            {notifications.map((note) => (
+              <div
+                key={note._id}
+                className="bg-white rounded-lg shadow-md p-4 space-y-3"
+              >
+                {note.profile && typeof note.profile === "string" && (
+                  <img
+                    src={note.profile}
+                    alt="notification"
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                )}
+
+                <h3 className="text-lg font-semibold">{note.title}</h3>
+                <p className="text-gray-700 text-sm">{note.description}</p>
+
+                <button
+                  onClick={() => handleDeleteNotification(note._id)}
+                  className="w-full bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-full flex items-center justify-center gap-2"
+                >
+                  <FiTrash2 /> Delete
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* --- DESKTOP TABLE VIEW (hidden on mobile) --- */}
+          <div className="hidden md:block bg-white rounded-lg shadow-md overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead className="bg-sky-100 text-sky-800 font-semibold">
+                <tr>
+                  <th className="px-4 py-3 text-left w-28">Image</th>
+                  <th className="px-4 py-3 text-left">Title</th>
+                  <th className="px-4 py-3 text-left">Description</th>
+                  <th className="px-4 py-3 text-left w-32">Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {notifications.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="px-4 py-6 text-center text-gray-500 italic"
+                    >
+                      No notifications available
+                    </td>
+                  </tr>
+                ) : (
+                  notifications.map((note) => (
+                    <tr
+                      key={note._id}
+                      className="border-b last:border-b-0 hover:bg-gray-50"
+                    >
+                      <td className="px-4 py-3">
+                        {note.profile && typeof note.profile === "string" ? (
+                          <img
+                            src={note.profile}
+                            alt="notification"
+                            className="w-16 h-16 rounded-md object-cover"
+                          />
+                        ) : (
+                          "No image"
+                        )}
+                      </td>
+
+                      <td className="px-4 py-3 font-semibold">{note.title}</td>
+                      <td className="px-4 py-3 text-gray-700">
+                        {note.description}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => handleDeleteNotification(note._id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-full flex items-center gap-1"
+                        >
+                          <FiTrash2 /> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <AddNotificationForm
+          onAddNotification={handleAddNotification}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
+    </div>
+  );
+}

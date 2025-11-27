@@ -6,12 +6,16 @@ import {
   createNotification,
   deleteNotification,
 } from "../../services/api/notificationsService";
+import DesktopViewNotifications from "./DesktopViewNotifications";
+import TabletViewNotifications from "./TabletViewNotifications";
+import MobileViewNotifications from "./MobileViewNotifications";
 
 export default function NotificationsList() {
   const [notifications, setNotifications] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
-  // Load from backend
+  // Load all notifications from backend
   useEffect(() => {
     async function loadData() {
       try {
@@ -24,7 +28,28 @@ export default function NotificationsList() {
     loadData();
   }, []);
 
-  // FIXED: Delete handler
+    // Track screen width for responsive rendering
+  useEffect(() => {
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+
+  
+  // Handle adding
+   async function handleAddNotification(newNotification) {
+    try {
+      const res = await createNotification(newNotification);
+
+      setNotifications((prev) => [...prev, res.title || res]);
+      setShowForm(false);
+    } catch (err) {
+      console.error("Failed to add notification", err);
+    }
+  }
+
+  // Handle delete
   async function handleDeleteNotification(id) {
     try {
       await deleteNotification(id);
@@ -34,88 +59,52 @@ export default function NotificationsList() {
     }
   }
 
-  // FIXED: Add handler
-  async function handleAddNotification(newNotification) {
-    try {
-      const res = await createNotification({
-        title: newNotification.title,
-        description: newNotification.description,
-      });
-
-      setNotifications((prev) => [...prev, res.title]); // backend returns `{title: object}`
-      setShowForm(false);
-    } catch (err) {
-      console.error("Failed to add notification", err);
+  // Which view to show?
+  const renderResponsiveView = () => {
+    if (screenWidth >= 1024) {
+      return (
+        <DesktopViewNotifications
+          notifications={notifications}
+          onDelete={handleDeleteNotification}
+        />
+      );
     }
-  }
 
+    if (screenWidth >= 640) {
+      return (
+        <TabletViewNotifications
+          notifications={notifications}
+          onDelete={handleDeleteNotification}
+        />
+      );
+    }
+
+    return (
+      <MobileViewNotifications
+        notifications={notifications}
+        onDelete={handleDeleteNotification}
+      />
+    );
+  };
+
+  // Render
   return (
-    <div>
+    <div className="w-full">
+      {/* Header */}
+      <section className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-full text-sm font-medium"
+        >
+          Add Notification
+        </button>
+      </section>
+
+      {/* Views */}
       {!showForm ? (
-        <>
-          {/* Header */}
-          <section className="flex items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              Notifications
-            </h1>
-            <button
-              className="ml-auto bg-sky-600 hover:bg-sky-700 text-white px-6 py-2.5 rounded-full text-sm font-medium"
-              onClick={() => setShowForm(true)}
-            >
-              Add Notification
-            </button>
-          </section>
-
-          {/* Table */}
-          <div className="bg-white rounded-lg shadow-md overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
-              <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide">
-                <tr>
-                  <th className="px-4 py-3 text-left">Title</th>
-                  <th className="px-4 py-3 text-left">Description</th>
-                  <th className="pl-7 py-3 text-left w-32">Action</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {notifications.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="3"
-                      className="px-4 py-6 text-center text-gray-500 italic"
-                    >
-                      No notifications available
-                    </td>
-                  </tr>
-                ) : (
-                  notifications.map((note) => (
-                    <tr
-                      key={note._id}
-                      className="border-b last:border-b-0 hover:bg-gray-50 transition-all duration-300"
-                    >
-                      <td className="px-4 py-3 font-semibold text-gray-800">
-                        {note.title}
-                      </td>
-
-                      <td className="px-4 py-3 text-gray-700">
-                        {note.description}
-                      </td>
-
-                      <td className="pl-7 py-3 text-left">
-                        <button
-                          onClick={() => handleDeleteNotification(note._id)}
-                          className="bg-red-500 text-white px-3 py-1.5 rounded-full text-sm font-medium inline-flex items-center gap-1 hover:bg-red-600 transition"
-                        >
-                          <FiTrash2 /> Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </>
+        renderResponsiveView()
       ) : (
         <AddNotificationForm
           onAddNotification={handleAddNotification}

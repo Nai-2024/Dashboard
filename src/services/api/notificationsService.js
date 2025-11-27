@@ -10,14 +10,24 @@ export async function fetchNotifications() {
 
 // Add new notification
 export async function createNotification(data) {
+  const formData = new FormData();
+  formData.append("title", data.title);
+  formData.append("description", data.description);
+
+  if (data.profile instanceof File) {
+    formData.append("profile", data.profile);   // FIXED
+  }
+
   const res = await fetch(`${BASE_URL}/api/titles`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: formData,
   });
+
   if (!res.ok) throw new Error("Failed to create notification");
   return res.json();
 }
+
+
 
 // Delete a notification
 export async function deleteNotification(id) {
