@@ -1,6 +1,5 @@
 import React from "react";
 import { FiTrash2 } from "react-icons/fi";
-import { fixImageUrl } from "../../services/fixImageDisplay";
 
 export default function DesktopViewNotifications({ notifications, onDelete }) {
   return (
@@ -9,6 +8,7 @@ export default function DesktopViewNotifications({ notifications, onDelete }) {
         <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide">
           <tr>
             <th className="px-4 py-2 text-left">Image</th>
+            <th className="px-4 py-2 text-left">Test Column</th>
             <th className="px-4 py-2 text-left">Title</th>
             <th className="px-4 py-2 text-left">Description</th>
             <th className="px-4 py-2 text-left">Action</th>
@@ -32,13 +32,18 @@ export default function DesktopViewNotifications({ notifications, onDelete }) {
                 <td className="px-4 py-3 align-top">
                   {note.profile ? (
                     <img
-                      src={fixImageUrl(note.profile)} 
+                      src={note.profile}
                       alt="notification"
                       className="w-48 h-28 rounded-md object-cover"
                     />
                   ) : (
                     "No image"
                   )}
+                </td>
+
+                {/* TITLE */}
+                <td className="px-4 py-3 align-top font-semibold text-gray-800 whitespace-nowrap">
+                  {note.title}
                 </td>
 
                 {/* TITLE */}
