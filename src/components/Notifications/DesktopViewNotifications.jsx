@@ -1,5 +1,6 @@
 import React from "react";
 import { FiTrash2 } from "react-icons/fi";
+import { fixImageUrl } from "../../services/fixImageDisplay";
 
 export default function DesktopViewNotifications({ notifications, onDelete }) {
   return (
@@ -31,7 +32,7 @@ export default function DesktopViewNotifications({ notifications, onDelete }) {
                 <td className="px-4 py-3 align-top">
                   {note.profile ? (
                     <img
-                      src={note.profile}
+                      src={fixImageUrl(note.profile)} 
                       alt="notification"
                       className="w-48 h-28 rounded-md object-cover"
                     />
