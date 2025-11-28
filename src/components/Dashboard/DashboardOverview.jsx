@@ -175,7 +175,7 @@ export default function DashboardOverview() {
           {/* Recent Activity & Quick Controls */}
           <section className="grid grid-cols-1 lg:grid-cols-[4fr_1fr] gap-6">
             {/* Recent Activity Table */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="bg-white p-4 rounded-lg shadow-sm">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">
                 Recent Activity
               </h3>
@@ -244,7 +244,7 @@ export default function DashboardOverview() {
                           </td>
 
                           {/* Date */}
-                          <td className="px-4 py-3 text-gray-500 text-sm whitespace-nowrap">
+                       <td className="px-2 py-2 sm:px-4 sm:py-3 text-gray-500 text-sm whitespace-nowrap">
                             <span className="flex flex-col sm:inline">
                               {new Date(a.time).toLocaleDateString(undefined, {
                                 dateStyle: "medium",

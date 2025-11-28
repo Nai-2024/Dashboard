@@ -62,6 +62,14 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 relative">
+      {/* BACKDROP OVERLAY */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 md:hidden z-30"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
       {/* ===== Sidebar ===== */}
       <aside
         className={`fixed md:static top-0 left-0 z-40 w-64 md:w-1/5 bg-white shadow-md flex flex-col min-h-screen transform transition-transform duration-300 ${

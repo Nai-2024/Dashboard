@@ -6,12 +6,11 @@ import {
   createNotification,
   deleteNotification,
 } from "../../services/api/notificationsService";
-import DesktopViewNotificationsNew from "./DesktopViewNotificationsNew";
+import DesktopViewNotifications from "./DesktopViewNotifications";
 import TabletViewNotifications from "./TabletViewNotifications";
 import MobileViewNotifications from "./MobileViewNotifications";
 
 export default function NotificationsList() {
-  console.log("🔥 VERSION 10 — Notification UI Loaded");
   const [notifications, setNotifications] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
@@ -64,7 +63,7 @@ export default function NotificationsList() {
   const renderResponsiveView = () => {
     if (screenWidth >= 1024) {
       return (
-        <DesktopViewNotificationsNew
+        <DesktopViewNotifications
           notifications={notifications}
           onDelete={handleDeleteNotification}
         />
