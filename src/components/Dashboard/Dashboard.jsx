@@ -29,7 +29,6 @@ export default function Dashboard() {
         name: username.charAt(0).toUpperCase() + username.slice(1),
         role: "Administrator",
         avatar: "/default-avatar.png",
-        lastUpdated: "Just now",
       });
     }
   }, []);
