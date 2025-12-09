@@ -190,7 +190,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.name}
               onChange={handleChange}
               placeholder="Enter place name"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
               required
             />
             {errors.name && (
@@ -206,7 +206,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.category}
               onChange={handleChange}
               required
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm bg-white"
             >
               <option value="">Select category</option>
               {categories.map((c) => (
@@ -227,7 +227,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
                 value={form.address}
                 onChange={handleChange}
                 placeholder="Enter full address"
-                className="mt-1 p-2 border border-gray-300 rounded-md text-sm w-full"
+                className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
                 required
               />
             </label>
@@ -242,7 +242,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.city}
               onChange={handleChange}
               placeholder="Enter city"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
               required
             />
             {errors.city && (
@@ -259,7 +259,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.state}
               onChange={handleChange}
               placeholder="Enter state/province"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
               required
             />
             {errors.state && (
@@ -276,7 +276,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.country}
               onChange={handleChange}
               placeholder="Enter country"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
               required
             />
             {errors.country && (
@@ -293,7 +293,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.postalCode}
               onChange={handleChange}
               placeholder="Enter postal code"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
               required
             />
             {errors.postalCode && (
@@ -310,7 +310,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.features}
               onChange={handleChange}
               placeholder="wifi, pool, spa"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
               required
             />
           </label>
@@ -323,7 +323,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.certification}
               onChange={handleChange}
               required
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm bg-white"
             >
               <option value="">Select certification</option>
               {certifications.map((c) => (
@@ -363,7 +363,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.phoneNumber}
               onChange={handleChange}
               placeholder="Enter phone number"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
               required
             />
             {errors.phoneNumber && (
@@ -379,7 +379,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.email}
               onChange={handleChange}
               placeholder="Enter email"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
               required
             />
             {errors.email && (
@@ -398,7 +398,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.website}
               onChange={handleChange}
               placeholder="https://example.com"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
             />
             {errors.website && (
               <p className="text-red-600 text-sm">{errors.website}</p>
@@ -413,7 +413,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               value={form.reviewLink}
               onChange={handleChange}
               placeholder="https://reviews.com/place"
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
             />
             {errors.reviewLink && (
               <p className="text-red-600 text-sm">{errors.reviewLink}</p>
@@ -430,7 +430,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               name="profileImage"
               onChange={handleFileChange}
               required={!editingData}
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
             />
             {errors.profileImage && (
               <p className="text-red-600 text-sm">{errors.profileImage}</p>
@@ -444,7 +444,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
               name="pictures"
               multiple
               onChange={handleFileChange}
-              className="mt-1 p-2 border border-gray-300 rounded-md text-sm"
+              className="mt-1 p-2 w-full border border-gray-300 rounded-md text-sm"
             />
           </label>
         </div>

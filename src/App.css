@@ -69,3 +69,8 @@
     font-size: 16px !important;
   }
 }
+
+/* globl bg applied to all select */
+select {
+  background-color: #ffffff;
+}

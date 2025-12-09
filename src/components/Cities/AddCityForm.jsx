@@ -127,7 +127,7 @@ export default function AddCityForm({ onAddCity, onCancel }) {
               name="country"
               value={form.country}
               onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border rounded-lg px-4 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
               required
             >
               <option value="">Select Country</option>
@@ -153,7 +153,7 @@ export default function AddCityForm({ onAddCity, onCancel }) {
               name="cityName"
               value={form.cityName}
               onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border rounded-lg px-4 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
               required
               disabled={!form.country} // disable until a country is selected
             >
