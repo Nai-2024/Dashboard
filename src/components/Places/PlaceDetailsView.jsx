@@ -40,57 +40,47 @@ export default function PlaceDetailsModel({
         />
 
         {/* Content */}
-        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 px-8 py-6 text-[15px] text-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 px-6 py-6 text-[15px] text-gray-700">
           {/* LEFT COLUMN */}
           <div className="space-y-5">
             {/* Row 1: City / State */}
             <div className="grid grid-cols-2 gap-6 border-b border-gray-300 pb-3">
               <div>
-                <p className="text-sm text-gray-500 font-medium">City</p>
-                <p className="text-gray-800">{place.city || "—"}</p>
+                <p className="font-semibold text-gray-900 mb-2">City</p>
+                <p className="text-gray-600 leading-relaxed">{place.city || "—"}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium">State</p>
-                <p className="text-gray-800">{place.state || "—"}</p>
+                <p className="font-semibold text-gray-900 mb-2">Province / State</p>
+                <p className="text-gray-600 leading-relaxed">{place.state || "—"}</p>
               </div>
             </div>
 
-            {/* Row 2: Country / Postal */}
+            {/* Row 2: Country / Address */}
             <div className="grid grid-cols-2 gap-6 border-b border-gray-300 pb-3">
               <div>
-                <p className="text-sm text-gray-500 font-medium">Country</p>
-                <p className="text-gray-800">{place.country || "—"}</p>
+                <p className="font-semibold text-gray-900 mb-2">Country</p>
+                <p className="text-gray-600 leading-relaxed">{place.country || "—"}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium">Postal Code</p>
-                <p className="text-gray-800">{place.postalCode || "—"}</p>
+                <p className="font-semibold text-gray-900 mb-2"> Address</p>
+                <p className="text-gray-600 leading-relaxed">{place.address || "—"}</p>
               </div>
-            </div>
-
-            {/* Address - Label and Value in One Line */}
-            <div className="grid grid-cols-2 gap-6 border-b border-gray-300 pb-3">
-              <p className="text-sm text-gray-500 font-medium min-w-[100px]">
-                Address
-              </p>
-              <p className="text-gray-800 break-words flex-1">
-                {place.address || "—"}
-              </p>
             </div>
 
             {/* Certification - Label and Value in One Line */}
             <div className="grid grid-cols-2 gap-6 border-b border-gray-300 pb-3">
-              <p className="text-sm text-gray-500 font-medium min-w-[100px]">
+              <p className="font-semibold text-gray-900 mb-2">
                 Certification
               </p>
-              <p className="text-gray-800 flex-1">
+              <p className="text-gray-600 leading-relaxed">
                 {place.certification || "—"}
               </p>
             </div>
 
             {/* Features */}
             <div className="border-b border-gray-300 pb-3">
-              <p className="text-sm text-gray-500 font-medium">Features</p>
-              <p className="text-gray-800">
+              <p className="font-semibold text-gray-900 mb-2">Features</p>
+              <p className="text-gray-600 leading-relaxed">
                 {Array.isArray(place.features)
                   ? place.features.join(", ")
                   : place.features || "—"}
@@ -125,7 +115,7 @@ export default function PlaceDetailsModel({
           </div>
 
           {/* RIGHT COLUMN */}
-          <div className="space-y-4 pl-6 md:pl-8 md:border-l border-gray-300">
+          <div className="space-y-4 pl-5 md:pl-5 md:border-l border-gray-300">
             {place.phoneNumber && (
               <p className="flex items-center gap-2 text-gray-700">
                 <Phone size={16} className="text-blue-600" />{" "}

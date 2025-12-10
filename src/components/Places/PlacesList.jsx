@@ -5,7 +5,7 @@ import TabletView from "./TabletView";
 import MobileView from "./MobileView";
 import { deletePlace, updatePlace } from "../../services/api/placesService";
 import { handleCreatePlace } from "../../services/dataHandlers";
-import PlaceDetailsModel from "./PlaceDetailsModel";
+import PlaceDetailsModel from "./PlaceDetailsView";
 import {placesSearchAndSort} from "../../services/searchSort";
 placesSearchAndSort
 export default function PlacesList({ places }) {

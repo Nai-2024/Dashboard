@@ -8,7 +8,7 @@ export default function DesktopView({
   searchQuery,
   setSearchQuery,
   sortOption,
-  setSortOption
+  setSortOption,
 }) {
   return (
     <div>
@@ -19,12 +19,12 @@ export default function DesktopView({
         setSortOption={setSortOption}
       />
 
-      <div className="w-full bg-transparent px-4 md:px-6 lg:px-0">
+      <div className="w-full bg-transparent px-4 md:px-4 lg:px-0">
         <div className="bg-white rounded-lg shadow-md overflow-x-auto">
           <table className="min-w-full border-collapse text-sm table-fixed">
             <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide">
               <tr>
-                <th className="px-5 py-3 text-left w-[12%]">Image</th>
+                <th className="px-4 py-3 text-left w-[12%]">Image</th>
                 <th className="px-4 py-3 text-left w-[12%]">City Name</th>
                 <th className="px-4 py-3 text-left w-[12%]">Country</th>
                 <th className="px-4 py-3 text-left w-[66%]">Description</th>
@@ -49,7 +49,7 @@ export default function DesktopView({
                     className="border-b border-gray-400 last:border-b-0 hover:bg-gray-50 transition-all"
                   >
                     {/* Image */}
-                    <td className="px-4 py-3 text-left align-top">
+                    <td className="px-2 py-3 text-left align-top">
                       {city.image ? (
                         <img
                           src={city.image}
@@ -66,7 +66,7 @@ export default function DesktopView({
                       <div className="flex-1">{city.cityName}</div>
                     </td>
 
-                      {/* Country Name */}
+                    {/* Country Name */}
                     <td className="px-4 py-3 font-semibold text-gray-800 align-top">
                       <div className="flex-1">{city.country}</div>
                     </td>
@@ -77,7 +77,7 @@ export default function DesktopView({
                     </td>
 
                     {/* Actions */}
-                    <td className="px-4 py-3 text-center pr-6">
+                    <td className="px-4 py-3 text-center pr-4">
                       <div className="flex flex-wrap gap-2 justify-start">
                         <button
                           onClick={() => onDelete(idx)}

@@ -179,11 +179,11 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
       </h2>
 
       <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-        {/* Row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Row 1 – mobile: stacked, md+: 2 columns */}
+        <div className="flex flex-col gap-6 md:grid md:grid-cols-2">
           {/* Name */}
           <label className="flex flex-col font-medium text-gray-700">
-            Place Name *
+            <span className="label-required">Place Name</span>
             <input
               type="text"
               name="name"
@@ -200,7 +200,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
 
           {/* Category */}
           <label className="flex flex-col font-medium text-gray-700">
-            Category *
+            <span className="label-required">Category</span>
             <select
               name="category"
               value={form.category}
@@ -220,7 +220,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
           {/* Address */}
           <div className="col-span-2">
             <label className="flex flex-col font-medium text-gray-700">
-              Address *
+              <span className="label-required">Address</span>
               <input
                 type="text"
                 name="address"
@@ -235,7 +235,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
 
           {/* City */}
           <label className="flex flex-col font-medium text-gray-700">
-            City *
+            <span className="label-required">City</span>
             <input
               type="text"
               name="city"
@@ -252,7 +252,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
 
           {/* State */}
           <label className="flex flex-col font-medium text-gray-700">
-            State/Province *
+            <span className="label-required">State/Province </span>
             <input
               type="text"
               name="state"
@@ -269,7 +269,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
 
           {/* Country */}
           <label className="flex flex-col font-medium text-gray-700">
-            Country *
+            <span className="label-required">Country</span>
             <input
               type="text"
               name="country"
@@ -286,7 +286,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
 
           {/* Postal Code */}
           <label className="flex flex-col font-medium text-gray-700">
-            Postal Code *
+            <span className="label-required">Postal Code</span>
             <input
               type="text"
               name="postalCode"
@@ -303,7 +303,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
 
           {/* Features */}
           <label className="flex flex-col font-medium text-gray-700">
-            Features *
+            <span className="label-required">Features</span>
             <input
               type="text"
               name="features"
@@ -317,7 +317,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
 
           {/* Certification */}
           <label className="flex flex-col font-medium text-gray-700">
-            Certification *
+            <span className="label-required">Certification</span>
             <select
               name="certification"
               value={form.certification}
@@ -338,7 +338,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
         {/* Description */}
         <div>
           <label className="flex flex-col font-medium text-gray-700">
-            Description *
+            <span className="label-required">Description</span>
             <textarea
               name="description"
               value={form.description}
@@ -356,7 +356,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
         {/* Contact Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <label className="flex flex-col font-medium text-gray-700">
-            Phone Number *
+            <span className="label-required">Phone Number</span>
             <input
               type="tel"
               name="phoneNumber"
@@ -372,7 +372,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
           </label>
 
           <label className="flex flex-col font-medium text-gray-700">
-            Email *
+            <span className="label-required">Email</span>
             <input
               type="email"
               name="email"
@@ -424,7 +424,7 @@ export default function AddPlaceForm({ onAddPlace, onCancel, editingData }) {
         {/* File Uploads */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <label className="flex flex-col font-medium text-gray-700">
-            Profile Image *
+            <span className="label-required">Profile Image</span>
             <input
               type="file"
               name="profileImage"

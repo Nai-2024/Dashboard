@@ -6,7 +6,7 @@ export default function DesktopView({
   setSearchQuery,
   sortOption,
   setSortOption,
-  setSelectedPlace
+  setSelectedPlace,
 }) {
   return (
     <div>
@@ -24,10 +24,9 @@ export default function DesktopView({
           {/* Sticky table header */}
           <thead className="bg-sky-100 text-sky-800 font-semibold tracking-wide sticky top-0 z-10">
             <tr>
-              <th className="px-4 py-3 text-left">Image</th>
+              <th className="px-4 py-3 text-left w-[150px]">Image</th>
               <th className="px-4 py-3 text-left">Name</th>
               <th className="px-4 py-3 text-left">City</th>
-              <th className="px-4 py-3 text-left">Category</th>
               <th className="px-4 py-3 text-left">Description</th>
               <th className="px-4 py-3 text-left w-[120px]">Actions</th>
             </tr>
@@ -44,25 +43,26 @@ export default function DesktopView({
               places.map((place, idx) => (
                 <tr
                   key={place._id || idx}
-                  className="border-b last:border-b-0 hover:bg-gray-50 transition-all"
+                  className="border-b border-gray-400 last:border-b-0 hover:bg-gray-50 transition-all"
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 w-[120px]">
                     {place.profile ? (
                       <img
                         src={place.profile}
                         alt={place.name}
-                        className="w-24 h-16 object-cover rounded-md"
+                        className="w-[120px] h-[90px] object-cover rounded-md"
                       />
                     ) : (
                       <span className="text-gray-400 italic">No image</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-800">
+                  <td className="px-4 py-3 font-medium text-gray-800 align-top">
                     {place.name}
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{place.city}</td>
-                  <td className="px-4 py-3 text-gray-700">{place.category}</td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 font-medium text-gray-800 align-top">
+                    {place.city}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 align-top">
                     {place.description}
                   </td>
                   <td className="px-4 py-3">
