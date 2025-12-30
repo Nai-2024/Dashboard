@@ -47,11 +47,17 @@ export default function PlaceDetailsModel({
             <div className="grid grid-cols-2 gap-6 border-b border-gray-300 pb-3">
               <div>
                 <p className="font-semibold text-gray-900 mb-2">City</p>
-                <p className="text-gray-600 leading-relaxed">{place.city || "—"}</p>
+                <p className="text-gray-600 leading-relaxed">
+                  {place.city || "—"}
+                </p>
               </div>
               <div>
-                <p className="font-semibold text-gray-900 mb-2">Province / State</p>
-                <p className="text-gray-600 leading-relaxed">{place.state || "—"}</p>
+                <p className="font-semibold text-gray-900 mb-2">
+                  Province / State
+                </p>
+                <p className="text-gray-600 leading-relaxed">
+                  {place.state || "—"}
+                </p>
               </div>
             </div>
 
@@ -59,19 +65,21 @@ export default function PlaceDetailsModel({
             <div className="grid grid-cols-2 gap-6 border-b border-gray-300 pb-3">
               <div>
                 <p className="font-semibold text-gray-900 mb-2">Country</p>
-                <p className="text-gray-600 leading-relaxed">{place.country || "—"}</p>
+                <p className="text-gray-600 leading-relaxed">
+                  {place.country || "—"}
+                </p>
               </div>
               <div>
                 <p className="font-semibold text-gray-900 mb-2"> Address</p>
-                <p className="text-gray-600 leading-relaxed">{place.address || "—"}</p>
+                <p className="text-gray-600 leading-relaxed">
+                  {place.address || "—"}
+                </p>
               </div>
             </div>
 
             {/* Certification - Label and Value in One Line */}
             <div className="grid grid-cols-2 gap-6 border-b border-gray-300 pb-3">
-              <p className="font-semibold text-gray-900 mb-2">
-                Certification
-              </p>
+              <p className="font-semibold text-gray-900 mb-2">Certification</p>
               <p className="text-gray-600 leading-relaxed">
                 {place.certification || "—"}
               </p>
@@ -96,9 +104,9 @@ export default function PlaceDetailsModel({
               </p>
             </div>
 
-            {/* Gallery */}
+            {/* Gallery (Desktop/Tablet only) */}
             {place.pictures?.length > 0 && (
-              <div className="border-b border-gray-300 pb-3">
+              <div className="hidden md:block border-b border-gray-300 pb-3">
                 <p className="font-semibold text-gray-900 mb-3 mt-4">Gallery</p>
                 <div className="flex gap-4 overflow-x-auto pb-2">
                   {place.pictures.map((pic, i) => (
@@ -115,49 +123,72 @@ export default function PlaceDetailsModel({
           </div>
 
           {/* RIGHT COLUMN */}
-          <div className="space-y-4 pl-5 md:pl-5 md:border-l border-gray-300">
-            {place.phoneNumber && (
-              <p className="flex items-center gap-2 text-gray-700">
-                <Phone size={16} className="text-blue-600" />{" "}
-                {place.phoneNumber}
-              </p>
-            )}
-            {place.email && (
-              <p className="flex items-center gap-2 text-gray-700 break-all">
-                <Mail size={16} className="text-blue-600" /> {place.email}
-              </p>
-            )}
-            {place.website && (
-              <p className="flex items-center gap-2 text-gray-700">
-                <Globe size={16} className="text-blue-600" />
-                <a
-                  href={
-                    place.website.startsWith("http")
-                      ? place.website
-                      : `https://${place.website}`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  {place.website}
-                </a>
-              </p>
-            )}
-            {place.reviewLink && (
-              <p className="flex items-center gap-2 text-gray-700">
-                <Star size={16} className="text-blue-600" />
-                <a
-                  href={place.reviewLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  View on TripAdvisor
-                </a>
-              </p>
-            )}
+          <div className="md:pl-5 md:border-l md:border-gray-300">
+            <div className="space-y-3 pb-4 border-b border-gray-300 md:border-b-0">
+              {place.phoneNumber && (
+                <p className="flex items-center gap-2 text-gray-700">
+                  <Phone size={16} className="text-blue-600" />
+                  {place.phoneNumber}
+                </p>
+              )}
+
+              {place.email && (
+                <p className="flex items-center gap-2 text-gray-700 break-all">
+                  <Mail size={16} className="text-blue-600" />
+                  {place.email}
+                </p>
+              )}
+
+              {place.website && (
+                <p className="flex items-center gap-2 text-gray-700">
+                  <Globe size={16} className="text-blue-600" />
+                  <a
+                    href={
+                      place.website.startsWith("http")
+                        ? place.website
+                        : `https://${place.website}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    {place.website}
+                  </a>
+                </p>
+              )}
+
+              {place.reviewLink && (
+                <p className="flex items-center gap-2 text-gray-700">
+                  <Star size={16} className="text-blue-600" />
+                  <a
+                    href={place.reviewLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    View on TripAdvisor
+                  </a>
+                </p>
+              )}
+            </div>
           </div>
+
+          {/* Gallery (Mobile only - goes after contact info) */}
+          {place.pictures?.length > 0 && (
+            <div className="md:hidden border-b border-gray-300 pb-3">
+              <p className="font-semibold text-gray-900 mb-4">Gallery</p>
+              <div className="flex gap-4 overflow-x-auto pb-2">
+                {place.pictures.map((pic, i) => (
+                  <img
+                    key={i}
+                    src={pic}
+                    alt={`Gallery ${i}`}
+                    className="h-24 w-36 object-cover rounded-lg shadow-sm"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Buttons */}

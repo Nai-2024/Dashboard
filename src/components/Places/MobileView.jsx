@@ -47,7 +47,7 @@ export default function MobilePlaceView({
                   <div className="w-full h-[180px] bg-gray-200 rounded-md" />
                 )}
 
-                {/* Info Row (Equal Distribution) */}
+                {/* Info Row */}
                 <div className="grid grid-cols-3 items-center text-center gap-2 mt-3">
                   {/* Place Name */}
                   <h3 className="text-left mt-2 text-lg font-semibold text-gray-900">

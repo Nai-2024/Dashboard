@@ -11,9 +11,7 @@ export default function SearchSortBar({
     <div className="flex flex-col w-full mb-6 gap-3 sm:flex-row sm:items-center sm:gap-4">
       {/* Search Box */}
       <div className="relative flex flex-1">
-        <MagnifyingGlassIcon
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-        />
+        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
 
         <input
           type="text"
@@ -38,7 +36,6 @@ export default function SearchSortBar({
           <option value="za">Name Z → A</option>
           <option value="name">Name</option>
           <option value="city">City</option>
-          <option value="category">Category</option>
         </select>
       </div>
     </div>

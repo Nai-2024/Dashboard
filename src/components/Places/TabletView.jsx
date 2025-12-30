@@ -76,7 +76,7 @@ export default function TabletView({
                           </span>
                         )}
 
-                        {/* Category badge (same width as City) */}
+                        {/* Category badge */}
                         {place.category && (
                           <span
                             className="border border-pink-300 text-xs font-medium px-3 py-1 rounded-full bg-pink-50/40 backdrop-blur-sm inline-flex items-center justify-center w-[100px] truncate"
@@ -97,7 +97,7 @@ export default function TabletView({
                   {/* -------- ACTIONS -------- */}
                   <td className="px-4 py-4">
                     <div className="flex w-full justify-center">
-                      {/* VIEW BUTTON – opens modal */}
+                      {/* VIEW BUTTON */}
                       <button
                         onClick={() => setSelectedPlace(place)}
                         className="bg-blue-500 text-white px-4 py-1.5 rounded-[10px] text-sm font-medium text-center hover:bg-blue-600 transition w-[80px]"
